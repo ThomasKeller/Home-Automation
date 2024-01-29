@@ -1,0 +1,25 @@
+{
+  "profiles": {
+    "Docker": {
+      "commandName": "Docker",
+      "environmentVariables": {
+        "LOGGINGLEVEL": "Debug"
+      }
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "distributionName": ""
+    },
+    "ha.ehz.serial.service": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "LOGGINGLEVEL": "Debug"
+      },
+      "dotnetRunMessages": true
+    }
+  }
+}
