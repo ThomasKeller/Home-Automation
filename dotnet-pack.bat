@@ -1,1 +1,0 @@
-dotnet cake --target=Pack --buildversion=1.0.20
