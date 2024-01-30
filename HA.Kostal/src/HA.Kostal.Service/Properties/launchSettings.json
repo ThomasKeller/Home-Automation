@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "HA.Kostal.Service": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "KOSTAL_STOP_DURING_SUNSET": "false"
+      }
+    }
+  }
+}
