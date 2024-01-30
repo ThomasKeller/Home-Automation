@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "ha.iobroker.service": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "INFLUX_TOKEN": "Ba9yPDZKaFkSlHErwNbOHfIkdyKSU9nwuzPCYGCKbxWT7HrVS6kp6FtetK_6ia43gJPqrZVsuk3dqE8uPk_p4w==",
+        "LOGGINGLEVEL": "Debug"
+      },
+      "dotnetRunMessages": true
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "environmentVariables": {
+        "INFLUX_TOKEN": "Ba9yPDZKaFkSlHErwNbOHfIkdyKSU9nwuzPCYGCKbxWT7HrVS6kp6FtetK_6ia43gJPqrZVsuk3dqE8uPk_p4w==",
+        "LOGGINGLEVEL": "Information"
+      }
+    }
+  }
+}

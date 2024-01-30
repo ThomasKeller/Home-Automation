@@ -1,0 +1,331 @@
+{
+  "DeviceGroups": [
+    {
+      "GroupName": "HM_Window_Sensor",
+      "Properties": {
+        "1.LOWBAT": {
+          "PropertyName": "LowBattery",
+          "Historize": true,
+          "DataType": "Boolean"
+        },
+        "1.STATE": {
+          "PropertyName": "WindowOpen",
+          "Historize": true,
+          "DataType": "Boolean"
+        }
+      }
+    },
+    {
+      "GroupName": "HM_Heating",
+      "Properties": {
+        "1.LOWBAT": {
+          "PropertyName": "LowBattery",
+          "Historize": true,
+          "DataType": "Boolean"
+        },
+        "4.BATTERY_STATE": {
+          "PropertyName": "BatteryLevel",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "4.ACTUAL_TEMPERATURE": {
+          "PropertyName": "ActualTemp",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "4.SET_TEMPERATURE": {
+          "PropertyName": "SetTemp",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "4.VALVE_STATE": {
+          "PropertyName": "Valve",
+          "Historize": true,
+          "DataType": "Integer"
+        }
+      }
+    },
+    {
+      "GroupName": "HM_Humidity",
+      "Properties": {
+        "0.LOWBAT": {
+          "PropertyName": "LowBattery",
+          "Historize": true,
+          "DataType": "Boolean"
+        },
+        "2.BATTERY_STATE": {
+          "PropertyName": "BatteryLevel",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "2.ACTUAL_HUMIDITY": {
+          "PropertyName": "Humidity",
+          "Historize": true,
+          "DataType": "Integer"
+        },
+        "2.ACTUAL_TEMPERATURE": {
+          "PropertyName": "Temperature",
+          "Historize": true,
+          "DataType": "Float"
+        }
+      }
+    },
+    {
+      "GroupName": "HMIP_Humidity",
+      "Properties": {
+        "0.LOW_BAT": {
+          "PropertyName": "LowBattery",
+          "Historize": true,
+          "DataType": "Boolean"
+        },
+        "0.OPERATING_VOLTAGE": {
+          "PropertyName": "BatteryLevel",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "0.RSSI_DEVICE": {
+          "PropertyName": "Rssi",
+          "Historize": true,
+          "DataType": "Integer"
+        },
+        "1.HUMIDITY": {
+          "PropertyName": "Humidity",
+          "Historize": true,
+          "DataType": "Integer"
+        },
+        "1.ACTUAL_TEMPERATURE": {
+          "PropertyName": "Temperature",
+          "Historize": true,
+          "DataType": "Float"
+        }
+      }
+    },
+    {
+      "GroupName": "OpenWeather",
+      "Properties": {
+        "ForecastCurrentClouds": {
+          "PropertyName": "clouds",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "Humidity": {
+          "PropertyName": "humidity",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "Pressure": {
+          "PropertyName": "pressure",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "CurrentState": {
+          "PropertyName": "state",
+          "Historize": true,
+          "DataType": "String"
+        },
+        "Temperatur": {
+          "PropertyName": "temperature",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "WindDirection": {
+          "PropertyName": "windDirection",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "WindSpeed": {
+          "PropertyName": "windSpeed",
+          "Historize": true,
+          "DataType": "Float"
+        }
+      }
+    },
+    {
+      "GroupName": "Shelly_S",
+      "Properties": {
+        "Relay0.Power": {
+          "PropertyName": "Power",
+          "Historize": true,
+          "DataType": "Float"
+        },
+        "Relay0.Energy": {
+          "PropertyName": "Energy",
+          "Historize": true,
+          "DataType": "Float"
+        }
+      }
+    }
+  ],
+  "Devices": [
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ0873940",
+      "DeviceName": "Thermostat Bad"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ1492454",
+      "DeviceName": "Thermostat Büro"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ1487951",
+      "DeviceName": "Thermostat Büro TV"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ1408296",
+      "DeviceName": "Thermostat Flur"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ1412474",
+      "DeviceName": "Thermostat Kueche"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ0873787",
+      "DeviceName": "Thermostat Marla"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ1408655",
+      "DeviceName": "Thermostat Schlafzimmer"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "PEQ1316980",
+      "DeviceName": "Thermostat Till"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ1408761",
+      "DeviceName": "Thermostat WC"
+    },
+    {
+      "GroupName": "HM_Heating",
+      "DeviceId": "NEQ0874141",
+      "DeviceName": "Thermostat Wohnzimmer"
+    },
+    {
+      "GroupName": "HM_Humidity",
+      "DeviceId": "MEQ1842067",
+      "DeviceName": "Wandthermostat Bad"
+    },
+    {
+      "GroupName": "HM_Humidity",
+      "DeviceId": "NEQ1522280",
+      "DeviceName": "Wandthermostat Kueche"
+    },
+    {
+      "GroupName": "HM_Humidity",
+      "DeviceId": "NEQ1522287",
+      "DeviceName": "Wandthermostat Wohnzimmer"
+    },
+    {
+      "GroupName": "HMIP_Humidity",
+      "DeviceId": "000E9569A23B5F",
+      "DeviceName": "Wandthermostat Waschkeller"
+    },
+    {
+      "GroupName": "HMIP_Humidity",
+      "DeviceId": "000E9569A23F2F",
+      "DeviceName": "Wandthermostat Keller hinten"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "NEQ0944772",
+      "DeviceName": "Fenster Schlafzimmer rechts"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "NEQ1506786",
+      "DeviceName": "Fenster Bad links"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "NEQ1506816",
+      "DeviceName": "Fenster Bad rechts"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "OEQ0224394",
+      "DeviceName": "Fenster Kueche links"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "OEQ0224362",
+      "DeviceName": "Fenster Kueche rechts"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "NEQ0942176",
+      "DeviceName": "Fenster Marla rechts"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "NEQ0942169",
+      "DeviceName": "Fenster NEQ0942169"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "NEQ0942185",
+      "DeviceName": "Fenster Till rechts"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "NEQ1506367",
+      "DeviceName": "Fenster WC"
+    },
+    {
+      "GroupName": "HM_Window_Sensor",
+      "DeviceId": "OEQ0224377",
+      "DeviceName": "Fenster Wohnzimmer"
+    },
+    {
+      "GroupName": "OpenWeather",
+      "DeviceId": "current",
+      "DeviceName": "WeatherForcast"
+    },
+    {
+      "GroupName": "OpenWeather",
+      "DeviceId": "day0",
+      "DeviceName": "WeatherForcastDay0"
+    },
+    {
+      "GroupName": "OpenWeather",
+      "DeviceId": "day1",
+      "DeviceName": "WeatherForcastDay1"
+    },
+    {
+      "GroupName": "OpenWeather",
+      "DeviceId": "day2",
+      "DeviceName": "WeatherForcastDay2"
+    },
+    {
+      "GroupName": "OpenWeather",
+      "DeviceId": "day3",
+      "DeviceName": "WeatherForcastDay3"
+    },
+    {
+      "GroupName": "Shelly_S",
+      "DeviceId": "SHPLG-S#040EB1#1",
+      "DeviceName": "Büro Steckdose"
+    },
+	{
+      "GroupName": "Shelly_S",
+      "DeviceId": "SHPLG-S#79C27D#1",
+      "DeviceName": "Schlafzimmer Lampe"
+    },
+    {
+      "GroupName": "Shelly_S",
+      "DeviceId": "SHPLG-S#79EDF1#1",
+      "DeviceName": "Küche Lampe"
+    },
+	{
+      "GroupName": "Shelly_S",
+      "DeviceId": "SHPLG-S#7A31B9#1",
+      "DeviceName": "Büro FileSRV"
+    },	
+  ]
+}
