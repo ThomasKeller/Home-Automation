@@ -5,7 +5,7 @@ namespace HA.EhZ;
 
 public class EhZSettings : AppSettingsBase
 {
-    public EhZSettings(IConfiguration? configuration)
+    public EhZSettings(IConfiguration configuration)
     {
         if (configuration != null)
         {

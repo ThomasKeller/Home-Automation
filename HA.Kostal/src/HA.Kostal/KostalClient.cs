@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Net;
 
 namespace HA.Kostal;
@@ -30,7 +29,7 @@ public class KostalClient : IKostalClient
         using var client = new HttpClient(handler);
         var before = DateTime.UtcNow;
         var response = await client.GetAsync(_url);
-        var page = response.Content.ReadAsStringAsync().Result;
+        var page = await response.Content.ReadAsStringAsync();
         var after = DateTime.UtcNow;
         return new KostalClientResult
         {
@@ -39,14 +38,5 @@ public class KostalClient : IKostalClient
             StatusCode = response.StatusCode,
             IsSuccessStatusCode = response.IsSuccessStatusCode
         };
-    }
-
-    public KostalClientResult readPage()
-    {
-        return _taskFactory
-            .StartNew(readPageAsync)
-            .Unwrap()
-            .GetAwaiter()
-            .GetResult();
     }
 }

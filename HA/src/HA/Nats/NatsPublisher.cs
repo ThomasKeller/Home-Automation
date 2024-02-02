@@ -1,44 +1,77 @@
 ﻿using Microsoft.Extensions.Logging;
-using NATS.Client;
-using System.Text;
+using Microsoft.Extensions.Primitives;
+using NATS.Client.Core;
+using System.Collections.ObjectModel;
 
 namespace HA.Nats;
 
 public class NatsPublisher
 {
+    private static readonly Dictionary<string, StringValues> _headerLP = new Dictionary<string, StringValues> 
+                    { { "PayloadType", "LineProtocol" }, { "DataType", typeof(Measurement).FullName } };
+    private static readonly Dictionary<string, StringValues> _headerJson = new Dictionary<string, StringValues> 
+                    { { "PayloadType", "JSON" }, { "DataType", typeof(Measurement).FullName } };
     private readonly ILogger _logger;
-    private readonly ConnectionFactory _connectionFactory = new ConnectionFactory();
-    private Options _options;
-    private IConnection _connection;
-    //private IJetStream _jetStream;
+    private readonly NatsOpts _natsOpts;
+    private NatsConnection? _connection;
 
-    public NatsPublisher(ILogger logger, string natsUrl = "nats://127.0.0.1:4222")
+    public NatsPublisher(ILogger logger, NatsOpts natsOpts)
     {
         _logger = logger;
-        _options = ConnectionFactory.GetDefaultOptions();
-        _options.Url= natsUrl;
-        _connection = _connectionFactory.CreateConnection();
-        /*var opts = new NatsOpts
-        {
-            Url = url,
-            LoggerFactory = loggerFactory,
-            Name = "NATS-by-Example",
-        };
-        await using var nats = new NatsConnection(opts);*/
-
-
-        //_jetStream =  _connection.CreateJetStreamContext(JetStreamOptions.DefaultJsOptions);
+        _natsOpts = natsOpts;
     }
 
-    public void Publish(string subject, string? payload)
+    public async Task PublishAsync(string subject, string? payload)
     {
+        if (_connection == null) {
+            await InitAsync(); 
+        }
         if (payload != null && payload.Length > 0)
         {
             _logger.LogDebug("NATS Publish: Subject: {0} Payload Length: {1}", subject, payload.Length);
-            var header = new MsgHeader();
-            header.Set("time", DateTime.UtcNow.Ticks.ToString());
-            var msg = new Msg(subject, header, Encoding.UTF8.GetBytes(payload));
-            _connection.Publish(msg);
+            if (_connection != null)
+            {
+                await _connection.PublishAsync(subject, payload);
+            }
+        }
+    }
+
+    public async Task PublishAsync(string subject, Measurement measurement, bool lineProtocol = false)
+    {
+        if (_connection == null)
+        {
+            await InitAsync();
+        }
+
+        if (measurement != null)
+        {
+            _logger.LogDebug("NATS Publish: Subject: {0} Measurement: {1}", subject, measurement.ToLineProtocol(TimeResolution.s));
+            if (_connection != null)
+            {
+                var headerParams = lineProtocol ? _headerLP : _headerJson;
+                var header = new NatsHeaders(headerParams);
+                await _connection.PublishAsync(
+                    subject, 
+                    lineProtocol ? measurement.ToLineProtocol(TimeResolution.ms) : measurement.ToJson(), 
+                    header);
+            }
+        }
+    }
+
+
+
+
+    private async Task InitAsync()
+    {
+        _connection = new NatsConnection(_natsOpts);
+        var timeResponse = await _connection.PingAsync();
+        var serverInfo = _connection.ServerInfo;
+        _logger.LogInformation("NATS connection state: {0} Ping/Pong time: {1} ms",
+            _connection.ConnectionState, timeResponse.TotalMilliseconds);
+        if (serverInfo != null)
+        {
+            _logger.LogInformation($"Server: Name: {serverInfo.Name} Version: {serverInfo.Version} Jetstream Enable: {serverInfo.JetStreamAvailable}");
+            _logger.LogInformation($"Server: Host: {serverInfo.Host} Port: {serverInfo.Port} Id: {serverInfo.Id}");
         }
     }
 }

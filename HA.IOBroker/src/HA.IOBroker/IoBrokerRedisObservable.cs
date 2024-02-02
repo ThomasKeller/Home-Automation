@@ -1,5 +1,5 @@
-﻿using HA.Common;
-using HA.Common.Observable;
+﻿using HA;
+using HA.Observable;
 using HA.IOBroker.config;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

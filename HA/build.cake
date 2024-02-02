@@ -6,7 +6,7 @@ var target = Argument("target", "Build");
 var configuration = Argument("configuration", "Release");
 var solutionFolder = "./";
 var haFolder = "./src/HA";
-var outputFolder = "./artifacts";
+var outputFolder = "../artifacts";
 var packFolder = "../../Releases/nuget";
 var nugetPackage = $"{packFolder}/HA.{version}.nupkg";
 var nugetEnvApiKey = "NUGET_API_KEY";
@@ -18,7 +18,13 @@ var nugetEnvApiKey = "NUGET_API_KEY";
 
 Task("Clean")
     .Does(() => {
-        CleanDirectory(outputFolder);
+        var settings = new DotNetCleanSettings
+        {
+            Framework = "net6.0",
+            Configuration = configuration,
+            OutputDirectory = "./artifacts/"
+        };
+        DotNetClean(haFolder, settings);
     });
 
 Task("Restore")

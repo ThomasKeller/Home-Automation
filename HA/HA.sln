@@ -13,6 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HA.InfluxWriter.Service", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HA.Store.WebApp", "src\HA.Store.WebApp\HA.Store.WebApp.csproj", "{F8B203E0-518D-455D-BA03-2427AF27AF40}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HA.NatsSampleApp", "test\HA.NatsSampleApp\HA.NatsSampleApp.csproj", "{7927470E-8764-4402-88A3-BA409CB699E3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleApps", "SampleApps", "{FB71433A-495C-4C7A-A2A8-7585F14D0B69}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HA-NatsSampleConsumer", "test\HA-NatsSampleConsumer\HA-NatsSampleConsumer.csproj", "{EB9C15E4-63FE-4A1F-84A5-13C7FB240731}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,9 +45,21 @@ Global
 		{F8B203E0-518D-455D-BA03-2427AF27AF40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8B203E0-518D-455D-BA03-2427AF27AF40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8B203E0-518D-455D-BA03-2427AF27AF40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7927470E-8764-4402-88A3-BA409CB699E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7927470E-8764-4402-88A3-BA409CB699E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7927470E-8764-4402-88A3-BA409CB699E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7927470E-8764-4402-88A3-BA409CB699E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB9C15E4-63FE-4A1F-84A5-13C7FB240731}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB9C15E4-63FE-4A1F-84A5-13C7FB240731}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB9C15E4-63FE-4A1F-84A5-13C7FB240731}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB9C15E4-63FE-4A1F-84A5-13C7FB240731}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7927470E-8764-4402-88A3-BA409CB699E3} = {FB71433A-495C-4C7A-A2A8-7585F14D0B69}
+		{EB9C15E4-63FE-4A1F-84A5-13C7FB240731} = {FB71433A-495C-4C7A-A2A8-7585F14D0B69}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7AD7A96D-61D3-4F17-A530-300B4E3752E2}

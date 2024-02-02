@@ -1,4 +1,4 @@
-﻿using HA.Common;
+﻿using HA;
 using HA.IOBroker.config;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

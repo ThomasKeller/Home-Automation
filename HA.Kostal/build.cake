@@ -2,7 +2,7 @@ var target = Argument("target", "Build");
 var configuration = Argument("configuration", "Release");
 var solutionFolder = "./";
 var serviceFolder = "./src/HA.Kostal.Service";
-var publishFolder = "../../Releases/nuget"
+var publishFolder = "../../Releases/nuget";
 var outputFolder = "./artifacts";
 
 Task("Clean")

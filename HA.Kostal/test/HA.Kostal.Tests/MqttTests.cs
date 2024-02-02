@@ -27,12 +27,12 @@ public class MqttTests
 
 
     [Test]
-    public async Task publish_payload_to_MQTT_topic_successfully()
+    public async Task publish_payload_to_MQTT_topic_successfully_Async()
     {
         var mqttClient = new MqttPublisher(_loggerFactory.CreateLogger<MqttPublisher>(), _mqttHost);
 
-        await mqttClient.Publish("measurements/test/value1", "12");
-        await mqttClient.Disconnect();
+        await mqttClient.PublishAsync("measurements/test/value1", "12");
+        await mqttClient.DisconnectAsync();
         Assert.Pass();
     }
 }

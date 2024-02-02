@@ -8,7 +8,7 @@ namespace HA.EhZ.Tests
     {
         private readonly Timer _timer;
 
-        public T? Value { get; set; }
+        public T Value { get; set; }
 
         public ObservableTest()
         {

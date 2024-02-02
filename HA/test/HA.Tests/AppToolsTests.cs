@@ -160,7 +160,7 @@ public class AppToolsTests
             Thread.Sleep(10);
             test.Add(value.DurationCount);
         }
-        Assert.True(test.Count > 0);
+        Assert.That(test.Count > 0, Is.True);
     }
 
 }

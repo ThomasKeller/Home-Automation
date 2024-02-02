@@ -1,5 +1,4 @@
-﻿using HA;
-using HA.Observable;
+﻿using HA.Observable;
 using Microsoft.Extensions.Logging;
 
 namespace HA.Kostal;
@@ -32,7 +31,7 @@ public class KostalObservable : ObservableBase<Measurement>
     public void Start()
     {
         _logger.LogInformation("start Kostal Observable.");
-        _task = new Task(() => ReadFromKostal(), _tokenSource.Token);
+        _task = ReadFromKostalAsync();
         _task.Start();
     }
 
@@ -51,7 +50,7 @@ public class KostalObservable : ObservableBase<Measurement>
         _observers.Clear();
     }
 
-    private void ReadFromKostal()
+    private async Task ReadFromKostalAsync()
     {
         while (!_tokenSource.Token.IsCancellationRequested)
         {
@@ -64,7 +63,7 @@ public class KostalObservable : ObservableBase<Measurement>
             try
             {
                 _logger.LogDebug("request Kostal page.");
-                var kostalClientResult = _kostalClient.readPage();
+                var kostalClientResult = await _kostalClient.readPageAsync();
                 if (kostalClientResult.IsSuccessStatusCode)
                 {
                     _logger.LogDebug("read Kostal page successfully.");
