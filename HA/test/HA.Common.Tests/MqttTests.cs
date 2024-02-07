@@ -36,6 +36,8 @@ namespace HA.Tests
             {
                 for (var x = 0; x < 10; x++)
                 {
+                    var task = sut.PublishAsync(CreateMeasurement(123 * x));
+                    var success = task.Result;
                     AsyncHelper.RunSync(() => sut.PublishAsync(CreateMeasurement(123 * x)));
                     Thread.Sleep(1000);
                 }

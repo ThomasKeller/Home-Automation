@@ -28,7 +28,7 @@ public class Worker : BackgroundService
                     {
                         try
                         {
-                            await _components.HealthMqttPublisher.Publish(componentStatus);
+                            await _components.HealthMqttPublisher.PublishAsync(componentStatus);
                         }
                         catch (Exception ex)
                         {

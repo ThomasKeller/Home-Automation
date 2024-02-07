@@ -7,8 +7,6 @@ public class KostalObservable : ObservableBase<Measurement>
 {
     private readonly IKostalClient _kostalClient;
     private readonly ILogger _logger;
-    private readonly CancellationTokenSource _tokenSource = new();
-    private Task? _task;
 
     public KostalObservable(ILogger logger, IKostalClient kostalClient)
     {
@@ -16,7 +14,7 @@ public class KostalObservable : ObservableBase<Measurement>
         _kostalClient = kostalClient ?? throw new ArgumentNullException(nameof(kostalClient));
     }
 
-    public TimeSpan MeasureInterval { get; set; } = TimeSpan.FromSeconds(60);
+    public TimeSpan MeasureInterval { get; set; } = TimeSpan.FromSeconds(30);
 
     public TimeSpan SleepInterval { get; set; } = TimeSpan.FromMinutes(5);
 
@@ -28,31 +26,10 @@ public class KostalObservable : ObservableBase<Measurement>
 
     public DateTime LastMeasurementSentAt { get; private set; } = DateTime.MinValue;
 
-    public void Start()
+    public async Task ReadFromKostalAsync(CancellationToken token)
     {
         _logger.LogInformation("start Kostal Observable.");
-        _task = ReadFromKostalAsync();
-        _task.Start();
-    }
-
-    public void Stop()
-    {
-        _logger.LogInformation("stop Kostal Observable.");
-        _tokenSource.Cancel();
-        foreach (var observer in _observers.ToArray())
-        {
-            if (observer != null)
-            {
-                _logger.LogDebug("send on complete event to observer #{0}.", observer.GetHashCode());
-                observer.OnCompleted();
-            }
-        }
-        _observers.Clear();
-    }
-
-    private async Task ReadFromKostalAsync()
-    {
-        while (!_tokenSource.Token.IsCancellationRequested)
+        while (!token.IsCancellationRequested)
         {
             if (StopDuringSunset && HasTheSunGoneDown())
             {
@@ -93,6 +70,8 @@ public class KostalObservable : ObservableBase<Measurement>
             _logger.LogDebug("wait {0} s.", MeasureInterval.TotalSeconds);
             Thread.Sleep((int)MeasureInterval.TotalMilliseconds);
         }
+        foreach (var observer in _observers)
+            observer.OnCompleted();
     }
 
     private bool HasTheSunGoneDown()

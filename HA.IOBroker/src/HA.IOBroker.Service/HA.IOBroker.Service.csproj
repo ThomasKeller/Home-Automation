@@ -19,7 +19,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\HA\src\HA\HA.csproj" />
-    <ProjectReference Include="..\HA.IOBroker\HA.IOBroker.csproj" />
+    <ProjectReference Include="..\..\..\HA\src\HA.Service\HA.Service.csproj" />
+	<ProjectReference Include="..\HA.IOBroker\HA.IOBroker.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ResourceSettings.Designer.cs">

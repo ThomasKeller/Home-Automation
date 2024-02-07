@@ -1,4 +1,4 @@
-﻿namespace HA;
+﻿namespace HA.Service.Settings;
 
 public class ApplicationSettingsException : Exception
 {

@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text;
 
-namespace HA.AppTools;
+namespace HA.Service.Settings;
 
 public abstract class AppSettingsBase
 {

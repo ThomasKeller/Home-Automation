@@ -18,7 +18,8 @@
     <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HA.Kostal\HA.Kostal.csproj" />
+	  <ProjectReference Include="..\..\..\HA\src\HA.Service\HA.Service.csproj" />
+	  <ProjectReference Include="..\HA.Kostal\HA.Kostal.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ResourceSettings.Designer.cs">

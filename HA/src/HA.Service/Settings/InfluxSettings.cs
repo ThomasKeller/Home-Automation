@@ -1,7 +1,6 @@
-﻿using HA.AppTools;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
-namespace HA.Influx;
+namespace HA.Service.Settings;
 
 public class InfluxSettings : AppSettingsBase
 {

@@ -5,6 +5,7 @@ using HA.EhZ.Observable;
 using System.Text;
 using HA.EhZ.Observer;
 using System.Net;
+using HA.Service.Settings;
 
 namespace HA.EhZ.Service;
 

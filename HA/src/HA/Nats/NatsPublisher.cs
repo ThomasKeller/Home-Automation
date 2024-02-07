@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using NATS.Client.Core;
-using System.Collections.ObjectModel;
 
 namespace HA.Nats;
 
@@ -17,8 +16,30 @@ public class NatsPublisher
 
     public NatsPublisher(ILogger logger, NatsOpts natsOpts)
     {
-        _logger = logger;
-        _natsOpts = natsOpts;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _natsOpts = natsOpts ?? throw new ArgumentNullException(nameof(natsOpts));
+    }
+
+    public NatsPublisher(ILogger logger, NatsOptions natsOptions)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        if (natsOptions == null) throw new ArgumentNullException(nameof(natsOptions));
+        _natsOpts = new NatsOpts
+        {
+            Url = natsOptions.Url,
+            Name = natsOptions.ClientName,
+            AuthOpts = new NatsAuthOpts
+            {
+                Username = natsOptions.User,
+                Password = natsOptions.Password
+            }
+        };
+    }
+
+    public async Task<bool> IsConnectedAsync()
+    {
+        var connectionsState = await InitAsync();
+        return connectionsState == NatsConnectionState.Open; 
     }
 
     public async Task PublishAsync(string subject, string? payload)
@@ -42,7 +63,6 @@ public class NatsPublisher
         {
             await InitAsync();
         }
-
         if (measurement != null)
         {
             _logger.LogDebug("NATS Publish: Subject: {0} Measurement: {1}", subject, measurement.ToLineProtocol(TimeResolution.s));
@@ -58,10 +78,7 @@ public class NatsPublisher
         }
     }
 
-
-
-
-    private async Task InitAsync()
+    private async Task<NatsConnectionState> InitAsync()
     {
         _connection = new NatsConnection(_natsOpts);
         var timeResponse = await _connection.PingAsync();
@@ -73,5 +90,6 @@ public class NatsPublisher
             _logger.LogInformation($"Server: Name: {serverInfo.Name} Version: {serverInfo.Version} Jetstream Enable: {serverInfo.JetStreamAvailable}");
             _logger.LogInformation($"Server: Host: {serverInfo.Host} Port: {serverInfo.Port} Id: {serverInfo.Id}");
         }
+        return _connection.ConnectionState;
     }
 }

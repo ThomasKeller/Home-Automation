@@ -204,12 +204,12 @@ public partial class InfluxResilientStore : IInfluxStore, IObserverProcessor
                 }
             }
         }
-        catch (InfluxSimpleStore.UnauthorizedException ex)
+        catch (UnauthorizedException ex)
         {
             _logger.LogCritical("Unauthorized: {0}", ex.Message);
             _UnauthorizedStatus = true;
         }
-        catch (InfluxSimpleStore.BadRequestException ex)
+        catch (BadRequestException ex)
         {
             _logger.LogError("Invalid Payload: {0}", ex.Message);
             RemoveMeasurement(id);
@@ -219,7 +219,7 @@ public partial class InfluxResilientStore : IInfluxStore, IObserverProcessor
             _logger.LogError("Invalid Payload: {0}", ex.Message);
             RemoveMeasurement(id);
         }
-        catch (InfluxSimpleStore.RestApiException ex)
+        catch (RestApiException ex)
         {
             _logger.LogError("Cannot write measurement to Influx: {0}", ex.Message);
             _influxConnected = false;
@@ -265,13 +265,13 @@ public partial class InfluxResilientStore : IInfluxStore, IObserverProcessor
             else
                 SaveToStore(measurements);
         }
-        catch (InfluxSimpleStore.UnauthorizedException ex)
+        catch (UnauthorizedException ex)
         {
             _logger.LogCritical("Unauthorized: {0}", ex.Message);
             _UnauthorizedStatus = true;
             SaveToStore(measurements);
         }
-        catch (InfluxSimpleStore.BadRequestException ex)
+        catch (BadRequestException ex)
         {
             _logger.LogError("Invalid Payload: {0}", ex.Message);
             WriteToInfluxSeparately(measurements);
@@ -281,7 +281,7 @@ public partial class InfluxResilientStore : IInfluxStore, IObserverProcessor
             _logger.LogError("Invalid Payload: {0}", ex.Message);
             WriteToInfluxSeparately(measurements);
         }
-        catch (InfluxSimpleStore.RestApiException ex)
+        catch (RestApiException ex)
         {
             _logger.LogError("Cannot write measurement to Influx: {0}", ex.Message);
             SaveToStore(measurements);
@@ -310,13 +310,13 @@ public partial class InfluxResilientStore : IInfluxStore, IObserverProcessor
             else
                 SaveToStore(measurement);
         }
-        catch (InfluxSimpleStore.UnauthorizedException ex)
+        catch (UnauthorizedException ex)
         {
             _logger.LogCritical("Unauthorized: {0}", ex.Message);
             _UnauthorizedStatus = true;
             SaveToStore(measurement);
         }
-        catch (InfluxSimpleStore.BadRequestException ex)
+        catch (BadRequestException ex)
         {
             _logger.LogError("Invalid Payload: {0} | {1}", ex.Message, measurement.ToString());
         }
@@ -324,7 +324,7 @@ public partial class InfluxResilientStore : IInfluxStore, IObserverProcessor
         {
             _logger.LogError("Invalid Payload: {0} | {1}", ex.Message, measurement.ToString());
         }
-        catch (InfluxSimpleStore.RestApiException ex)
+        catch (RestApiException ex)
         {
             _logger.LogError("Cannot write measurement to Influx: {0}", ex.Message);
             SaveToStore(measurement);

@@ -2,16 +2,16 @@
 
 namespace HA;
 
-public class MeasurementObserver : IObserver<Measurement>
+public class MeasurementActionObserver : IObserver<Measurement>
 {
     private readonly ILogger _logger;
-    private readonly IObserverProcessor _processor;
+    private readonly Action<Measurement> _measurementAction;
     private IDisposable? _unsubscriber;
 
-    public MeasurementObserver(ILogger logger, IObserverProcessor processor)
+    public MeasurementActionObserver(ILogger logger, Action<Measurement> measurmentAction)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _processor = processor ?? throw new ArgumentNullException(nameof(processor));
+        _measurementAction = measurmentAction ?? throw new ArgumentNullException(nameof(measurmentAction));
     }
 
     public DateTime LastMeasurementProccessed { get; private set; } = DateTime.MinValue;
@@ -40,7 +40,7 @@ public class MeasurementObserver : IObserver<Measurement>
     {
         LastMeasurementProccessed = DateTime.Now;
         _logger.LogDebug(AddThreadIDPrefix($"OnNext {DateTime.Now.ToShortTimeString()}"));
-        _processor.ProcessMeasurement(value);
+        _measurementAction.Invoke(value);
     }
 
     private string AddThreadIDPrefix(string message)

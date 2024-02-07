@@ -35,7 +35,7 @@ namespace HA.Common.Tests
             var sut = new InfluxSimpleStore("http://192.168.111.17:8086", "Test", "Keller", _token + "-");
             var reachable = sut.Ping();
             Assert.That(reachable, Is.True);
-            Assert.Throws<InfluxSimpleStore.UnauthorizedException>(() => sut.WriteMeasurement(CreateMeasurement()));
+            Assert.Throws< UnauthorizedException>(() => sut.WriteMeasurement(CreateMeasurement()));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace HA.Common.Tests
         {
             var reachable = _client.Ping();
             Assert.That(reachable, Is.True);
-            Assert.Throws<InfluxSimpleStore.BadRequestException>(() => _client.WriteMeasurement(new Measurement()));
+            Assert.Throws<BadRequestException>(() => _client.WriteMeasurement(new Measurement()));
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace HA.Common.Tests
         {
             var reachable = _client.Ping();
             Assert.That(reachable, Is.True);
-            Assert.Throws<InfluxSimpleStore.BadRequestException>(() => _client.WriteMeasurement(new Measurement { Device = "Test" }));
+            Assert.Throws<BadRequestException>(() => _client.WriteMeasurement(new Measurement { Device = "Test" }));
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace HA.Common.Tests
         public void check_that_influx_client_throws_RestApiException_when_influx_server_is_not_reachable()
         {
             var sut = new InfluxSimpleStore("http://192.168.112.17:8086", "Test", "Keller", _token) { Timeout = 2000 };
-            Assert.Throws<InfluxSimpleStore.RestApiException>(() => sut.WriteMeasurement(CreateMeasurement()));
+            Assert.Throws<RestApiException>(() => sut.WriteMeasurement(CreateMeasurement()));
         }
 
         [Test]
@@ -185,7 +185,7 @@ namespace HA.Common.Tests
             //.Throws(new InfluxSimpleStore.BadRequestException(new RestSharp.RestResponse(), measurements));
             influxSimpleStoreMock.Setup(x => x.WriteMeasurements(measurements))
                 .Callback(() => writeMeasurement2++)
-                .Throws(new InfluxSimpleStore.BadRequestException(new RestSharp.RestResponse()));
+                .Throws(new BadRequestException(new RestSharp.RestResponse()));
 
             var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
@@ -215,7 +215,7 @@ namespace HA.Common.Tests
             var influxSimpleStoreMock = new Mock<IInfluxStore>();
             influxSimpleStoreMock.Setup(x => x.WriteMeasurement(It.IsAny<Measurement>()));
             influxSimpleStoreMock.Setup(x => x.WriteMeasurements(measurements))
-                .Throws(new InfluxSimpleStore.UnauthorizedException(new RestSharp.RestResponse()));
+                .Throws(new UnauthorizedException(new RestSharp.RestResponse()));
 
             var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
@@ -244,11 +244,11 @@ namespace HA.Common.Tests
 
             var influxSimpleStoreMock = new Mock<IInfluxStore>();
             influxSimpleStoreMock.Setup(x => x.WriteMeasurement(measurement1))
-                .Throws(new InfluxSimpleStore.BadRequestException(new RestSharp.RestResponse()));
+                .Throws(new BadRequestException(new RestSharp.RestResponse()));
             influxSimpleStoreMock.Setup(x => x.WriteMeasurement(measurement2));
 
             influxSimpleStoreMock.Setup(x => x.WriteMeasurements(measurements))
-                .Throws(new InfluxSimpleStore.BadRequestException(new RestSharp.RestResponse()));
+                .Throws(new BadRequestException(new RestSharp.RestResponse()));
             var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
             client.WriteMeasurements(measurements);
@@ -276,11 +276,11 @@ namespace HA.Common.Tests
 
             var influxSimpleStoreMock = new Mock<IInfluxStore>();
             influxSimpleStoreMock.Setup(x => x.WriteMeasurement(measurement1))
-                .Throws(new InfluxSimpleStore.BadRequestException(new RestSharp.RestResponse()));
+                .Throws(new BadRequestException(new RestSharp.RestResponse()));
             influxSimpleStoreMock.Setup(x => x.WriteMeasurement(measurement2));
 
             influxSimpleStoreMock.Setup(x => x.WriteMeasurements(measurements))
-                .Throws(new InfluxSimpleStore.RestApiException(new RestSharp.RestResponse()));
+                .Throws(new RestApiException(new RestSharp.RestResponse()));
             var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
             client.WriteMeasurements(measurements);

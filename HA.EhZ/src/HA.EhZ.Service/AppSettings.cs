@@ -1,6 +1,4 @@
-﻿using HA.AppTools;
-using HA.Influx;
-using HA.Mqtt;
+﻿using HA.Service.Settings;
 
 namespace HA.EhZ.Service;
 
@@ -16,8 +14,8 @@ public class AppSettings
 
     public AppSettings(ILogger logger, AppInitSettings appInitSettings)
     {
-        Application = appInitSettings;
-        Ehz = new EhZSettings(Application.Configuration);
+        Application = appInitSettings ?? throw new ArgumentNullException(nameof(appInitSettings));
+        Ehz = new EhZSettings(Application.Configuration ?? throw new ArgumentNullException(nameof(appInitSettings)));
         Influx = new InfluxSettings(Application.Configuration);
         Mqtt = new MqttSettings(Application.Configuration);
     }

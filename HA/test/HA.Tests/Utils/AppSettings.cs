@@ -1,4 +1,4 @@
-﻿using HA.AppTools;
+﻿using HA.Service.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Logging;

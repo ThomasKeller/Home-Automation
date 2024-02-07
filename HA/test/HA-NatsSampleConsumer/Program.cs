@@ -1,6 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using HA;
-using HA.AppTools;
 using HA.Nats;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
@@ -8,7 +7,7 @@ using NATS.Client.Core;
 var loggerFactory = LoggerFactory.Create(builder => builder
     .AddFilter("Microsoft", LogLevel.Warning)
     .AddFilter("System", LogLevel.Warning)
-    .AddFilter("ha", LogLevel.Debug)
+    .AddFilter("HA", LogLevel.Debug)
     .SetMinimumLevel(LogLevel.Warning)
     .AddSimpleConsole(options => {
         options.SingleLine = true;
@@ -29,6 +28,6 @@ var natsObservable = new NatsSubscriber(loggerFactory.CreateLogger<NatsSubscribe
 
 natsObservable.Subscribe(consoleObserver);
 
-await natsObservable.SubscibeAsync("health.test.*");
+await natsObservable.SubscibeAsync("measurements.new.*");
 
 

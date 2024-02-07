@@ -1,12 +1,8 @@
 ﻿namespace HA.Influx;
 
-public interface IInfluxStore
+public interface IInfluxStore : IMeasurmentStore
 {
     bool CheckHealth();
 
     bool Ping();
-
-    void WriteMeasurement(Measurement measurement);
-
-    void WriteMeasurements(IEnumerable<Measurement> measurements);
 }

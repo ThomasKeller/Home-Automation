@@ -1,4 +1,4 @@
-﻿namespace HA.AppTools;
+﻿namespace HA.Service.Settings;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class ConfigParameterAttribute : Attribute

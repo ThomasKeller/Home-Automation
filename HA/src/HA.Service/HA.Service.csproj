@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net6.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Nullable>enable</Nullable>
+	  <VersionPrefix>1.0.18</VersionPrefix>
+	  <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+	  <FileVersion>$(VersionPrefix).0</FileVersion>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <Description>Home Automation Service Library.</Description>
+	  <Authors>Thomas Keller</Authors>
+	  <RepositoryUrl>https://github.com/ThomasKeller/Home-Automation</RepositoryUrl>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <Title>Home Automation Service Library</Title>
+	  <PackageProjectUrl>https://github.com/ThomasKeller/Home-Automation</PackageProjectUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageLicenseFile>LICENSE</PackageLicenseFile>
+	  <PackageReadmeFile>readme.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Link="LICENSE">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+	<None Include="../../readme.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\HA\HA.csproj" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>

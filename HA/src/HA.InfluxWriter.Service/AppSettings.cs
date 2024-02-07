@@ -1,6 +1,6 @@
-﻿using HA.AppTools;
-using HA.Influx;
+﻿using HA.Influx;
 using HA.Nats;
+using HA.Service.Settings;
 using Microsoft.Extensions.Logging;
 
 namespace HA.InfluxWriter.Service;

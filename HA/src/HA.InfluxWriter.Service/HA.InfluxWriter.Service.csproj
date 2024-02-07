@@ -8,6 +8,7 @@
     <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HA.Service\HA.Service.csproj" />
     <ProjectReference Include="..\HA\HA.csproj" />
   </ItemGroup>
   <ItemGroup>

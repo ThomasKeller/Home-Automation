@@ -13,6 +13,7 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
     private readonly MqttClientOptions _clientOptions;
     private readonly ConcurrentQueue<Tuple<string, string>> _messages = new();
     private DateTime _lastConnectTime = DateTime.MinValue;
+    private string ThreadIdString => $"TID:{Thread.CurrentThread.ManagedThreadId}";
 
     public string? ClientId { get; private set; }
 
@@ -56,7 +57,7 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
                 .WithPayload(payload)
                 .Build();
             var result = await _client.PublishAsync(applicationMessage, CancellationToken.None);
-            _logger.LogInformation("published MQTT message: {0} | {1}", result.ReasonCode, topic);
+            _logger.LogInformation("{0} published MQTT message: {1} | {2}", ThreadIdString, result.ReasonCode, topic);
             return result.IsSuccess;
         }
         return false;
@@ -76,7 +77,7 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
                 var result = await _client.PublishAsync(applicationMessage, CancellationToken.None);
                 if (!result.IsSuccess)
                 {
-                    _logger.LogDebug("published MQTT message: {0} | {1}", result.ReasonCode, topicAndPayload.Key);
+                    _logger.LogDebug("{0} published MQTT message: {1} | {2}", ThreadIdString, result.ReasonCode, topicAndPayload.Key);
                     return false;
                 }
             }
@@ -85,13 +86,12 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
         return false;
     }
 
-    public async Task<bool> PublishAsync(Measurement measurement)
+    public async Task<bool> PublishAsync(string topicPrefix, Measurement measurement)
     {
         var isConnected = await EnsureConnectedAsync();
         if (isConnected)
         {
-            var baseTopic = $"measurements/{measurement.Device}";
-
+            var baseTopic = topicPrefix.Trim();
             var messages = new List<MqttApplicationMessage> {
                 CreateMessage($"{baseTopic}/quality", measurement.Quality.ToString()),
                 CreateMessage($"{baseTopic}/time", measurement.GetUtcTimeStamp().ToString("s"))
@@ -113,10 +113,17 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
                     return false;
                 }
             }
-            _logger.LogInformation("published MQTT messages: {0} | {1}", messages.Count, baseTopic);
+            _logger.LogInformation("{0} published MQTT messages: {1} | {2}", ThreadIdString, messages.Count, baseTopic);
             return true;
         }
         return false;
+    }
+
+
+    public async Task<bool> PublishAsync(Measurement measurement)
+    {
+        var topicPrefix = $"measurements/{measurement.Device}";
+        return await PublishAsync(topicPrefix, measurement);
     }
 
     public void ProcessMeasurement(Measurement measurement)
@@ -137,16 +144,20 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
         var result = await _client.PublishAsync(message, CancellationToken.None);
         if (!result.IsSuccess)
         {
-            _logger.LogInformation("published MQTT message: {0} | {1}", result.ReasonCode, message.Topic);
+            _logger.LogInformation("{0} published MQTT message: {1} | {2}", ThreadIdString, result.ReasonCode, message.Topic);
         }
         return result.IsSuccess;
+    }
+
+    public async Task<bool> IsConnectedAsync()
+    {
+        return await EnsureConnectedAsync();
     }
 
     private async Task<bool> EnsureConnectedAsync()
     {
         try
         {
-            //_client.ReconnectAsync
             if (!_client.IsConnected)
             {
                 if (_lastConnectTime == DateTime.MinValue)
@@ -156,18 +167,18 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
                     {
                         _lastConnectTime = DateTime.Now;
                     }
-                    _logger.LogInformation("try to connect to MQTT broker: {0} | {1}", connectResult.ReasonString, connectResult.ResultCode);
+                    _logger.LogInformation("{0} try to connect to MQTT broker: {1} | {2}", ThreadIdString, connectResult.ReasonString, connectResult.ResultCode);
                 }
                 else
                 {
                     await _client.ReconnectAsync(CancellationToken.None);
-                    _logger.LogInformation("try to re-connect to MQTT broker: {0}", _client.IsConnected);
+                    _logger.LogInformation("{0} try to re-connect to MQTT broker: {1}", ThreadIdString, _client.IsConnected);
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogCritical("MQTT Client Exception: {0}", ex.Message);
+            _logger.LogCritical("{0} MQTT Client Exception: {1}", ThreadIdString, ex.Message);
         }
         return _client.IsConnected;
     }

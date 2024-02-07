@@ -1,8 +1,8 @@
-﻿using HA.Common;
-using HA.Common.Influx;
-using HA.Common.Mqtt;
-using HA.Common.Redis;
-using HA.Common.Store;
+﻿using HA;
+using HA.Influx;
+using HA.Mqtt;
+using HA.Redis;
+using HA.Store;
 using HA.IOBroker.config;
 using Newtonsoft.Json;
 using System.Text;

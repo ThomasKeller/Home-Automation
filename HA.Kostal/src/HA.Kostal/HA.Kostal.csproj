@@ -10,8 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="HA" Version="1.0.21" />
-		<PackageReference Include="InfluxDB.Client" Version="4.14.0" />
+	  <ProjectReference Include="..\..\..\HA\src\HA\HA.csproj" />
 	</ItemGroup>
 	
 </Project>

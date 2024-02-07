@@ -1,7 +1,6 @@
-﻿using HA.AppTools;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
-namespace HA.EhZ;
+namespace HA.Service.Settings;
 
 public class EhZSettings : AppSettingsBase
 {

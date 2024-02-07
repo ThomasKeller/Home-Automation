@@ -1,4 +1,5 @@
-using HA.AppTools;
+
+using HA.Service.Settings;
 
 namespace HA.EhZ.Service;
 

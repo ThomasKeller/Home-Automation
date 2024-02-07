@@ -3,47 +3,8 @@ using System.Net;
 
 namespace HA.Influx;
 
-public class InfluxSimpleStore : IInfluxStore, IObserverProcessor
+public partial class InfluxSimpleStore : IInfluxStore, IObserverProcessor
 {
-    public class RestApiException : Exception
-    {
-        public RestResponse Response { get; protected set; }
-
-        public RestApiException(RestResponse restResponse)
-        { Response = restResponse; }
-
-        public RestApiException(string message, RestResponse restResponse)
-            : base(message) { Response = restResponse; }
-
-        public RestApiException(string message, Exception innerException, RestResponse restResponse)
-            : base(message, innerException) { Response = restResponse; }
-    }
-
-    public class BadRequestException : RestApiException
-    {
-        public BadRequestException(RestResponse restResponse)
-            : base(restResponse) { }
-
-        public BadRequestException(string message, RestResponse restResponse)
-            : base(message, restResponse) { }
-
-        public BadRequestException(string message, Exception innerException, RestResponse restResponse)
-            : base(message, innerException, restResponse) { }
-    }
-
-    public class UnauthorizedException : RestApiException
-    {
-        public UnauthorizedException(RestResponse restResponse)
-            : base(restResponse) { }
-
-        public UnauthorizedException(string message, RestResponse restResponse) : base(message, restResponse)
-        {
-        }
-
-        public UnauthorizedException(string message, Exception innerException, RestResponse restResponse)
-            : base(message, innerException, restResponse) { }
-    }
-
     private readonly string _url;
     private readonly string _token;
     private readonly string _bucket;

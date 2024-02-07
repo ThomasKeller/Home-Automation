@@ -30,6 +30,6 @@ public class ConsoleObserver : IObserver<Measurement>
 
     public virtual void OnNext(Measurement value)
     {
-        Console.WriteLine($"Measurement: {value.GetTimeStamp().ToString("s")} {value.Device} {value.ToLineProtocol()}");
+        Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} Measurement: {value.GetTimeStamp().ToString("s")} {value.Device} {value.ToLineProtocol()}");
     }
 }

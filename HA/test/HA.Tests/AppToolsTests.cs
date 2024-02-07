@@ -1,8 +1,6 @@
-using HA.AppTools;
-using HA.Influx;
+using HA.Service.Settings;
 using HA.Tests.Utils;
 using Microsoft.Extensions.Logging;
-using NuGet.Frameworks;
 
 namespace HA.Tests;
 

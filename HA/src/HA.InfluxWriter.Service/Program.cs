@@ -1,9 +1,7 @@
-﻿using HA.AppTools;
-using HA.Nats;
+﻿using HA.Service.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NATS.Client.Core;
 
 namespace HA.InfluxWriter.Service;
 

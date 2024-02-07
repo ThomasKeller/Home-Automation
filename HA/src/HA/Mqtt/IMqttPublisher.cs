@@ -10,5 +10,7 @@ public interface IMqttPublisher
 
     Task<bool> PublishAsync(string topic, string payload);
 
+    Task<bool> PublishAsync(string topic, Measurement measurement);
+
     Task<bool> PublishAsync(Measurement measurement);
 }
