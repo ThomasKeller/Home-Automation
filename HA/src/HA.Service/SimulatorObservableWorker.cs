@@ -7,7 +7,7 @@ namespace HA.Service;
 public class SimulatorObservableWorker : BackgroundService
 {
     private readonly ILogger _logger;
-    private string ThreadIdString => $"TID:{Thread.CurrentThread.ManagedThreadId}";
+    private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]";
 
     public class SimulatorMeasurementObservable : ObservableBase<Measurement>
     {

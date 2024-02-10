@@ -13,7 +13,7 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
     private readonly MqttClientOptions _clientOptions;
     private readonly ConcurrentQueue<Tuple<string, string>> _messages = new();
     private DateTime _lastConnectTime = DateTime.MinValue;
-    private string ThreadIdString => $"TID:{Thread.CurrentThread.ManagedThreadId}";
+    private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]";
 
     public string? ClientId { get; private set; }
 

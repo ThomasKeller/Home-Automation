@@ -1,6 +1,7 @@
 ﻿using HA.Mqtt;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System.Collections.Concurrent;
 
 namespace HA.Service;
@@ -10,7 +11,7 @@ public class MqttWorker : BackgroundService, IObserverProcessor
     private readonly ILogger _logger;
     private readonly MqttPublisher _mqttPublisher;
     private readonly ConcurrentQueue<Measurement> _measurementQueue = new ();
-    private string ThreadIdString => $"TID:{Thread.CurrentThread.ManagedThreadId}";
+    private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]";
 
     /// <summary>
     /// Decide if we want to publish a Measurement as a JSON payload
@@ -37,6 +38,12 @@ public class MqttWorker : BackgroundService, IObserverProcessor
     ///   measurements/{device}.value3
     /// </remarks>
     public bool PublishValueList { get; set; } = true;
+
+    public ValueWithStatistic<int> CountJsonPublished { get; set; } = new ValueWithStatistic<int>(0);
+    public ValueWithStatistic<int> CountLineProtocolPublished { get; set; } = new ValueWithStatistic<int>(0);
+    public ValueWithStatistic<int> CountValueListPublished { get; set; } = new ValueWithStatistic<int>(0);
+    public ValueWithStatistic<int> CountError { get; set; } = new ValueWithStatistic<int>(0);
+    public ValueWithStatistic<bool> IsConnected { get; set; } = new ValueWithStatistic<bool>(false);
 
     public MqttWorker(ILogger<MqttWorker> logger, MqttPublisher mqttPublisher)
     {
@@ -75,22 +82,29 @@ public class MqttWorker : BackgroundService, IObserverProcessor
                 {
                     try
                     {
+                        _logger.LogInformation("{0} Process measurement: {1}", ThreadIdString, measurement.ToString());
                         if (PublishJson)
                         {
                             var topic = $"json/measurments/{measurement.Device}";
-                            _logger.LogInformation("{0} MQTT Publish to Topic: {1}", ThreadIdString, topic);
                             await _mqttPublisher.PublishAsync(topic, measurement.ToJson());
+                            CountJsonPublished.Value++;
+                            _logger.LogInformation("{0} MQTT Publish to Topic: {1} | ChangeCount: {2} in {3}s", 
+                                ThreadIdString, topic, CountJsonPublished.DurationCount, (int)CountJsonPublished.CountTimeSpan.TotalSeconds);
                         }
                         if (PublishLineProtocol)
                         {
                             var topic = $"lineprotocol/measurments/{measurement.Device}";
-                            _logger.LogInformation("{0} MQTT Publish to Topic: {1}", ThreadIdString, topic);
                             await _mqttPublisher.PublishAsync(topic, measurement.ToLineProtocol());
+                            CountLineProtocolPublished.Value++;
+                            _logger.LogInformation("{0} MQTT Publish to Topic: {1} | ChangeCount: {2} in {3}s",
+                                ThreadIdString, topic, CountLineProtocolPublished.DurationCount, (int)CountLineProtocolPublished.CountTimeSpan.TotalSeconds);
                         }
                         if (PublishValueList)
                         {
-                            _logger.LogInformation("{0} MQTT Publish to Topic: measurement/{1}/value", ThreadIdString, measurement.Device);
                             await _mqttPublisher.PublishAsync(measurement);
+                            CountValueListPublished.Value++;
+                            _logger.LogInformation("{0} MQTT Publish to Topic: measurement/{1}/value | ChangeCount: {2} in {3}s", 
+                                ThreadIdString, measurement.Device, CountValueListPublished.DurationCount, (int)CountValueListPublished.CountTimeSpan.TotalSeconds);
                         }
                         _measurementQueue.TryDequeue(out measurement);
                     }
@@ -98,6 +112,7 @@ public class MqttWorker : BackgroundService, IObserverProcessor
                     {
                         _logger.LogCritical("{0} Error Nats PublishAsync: {1}", ThreadIdString, ex.Message);
                         _logger.LogInformation("{0} Wait 30 seconds", ThreadIdString);
+                        CountError.Value++;
                         await Task.Delay(30000);
                     }
                 }
@@ -114,12 +129,13 @@ public class MqttWorker : BackgroundService, IObserverProcessor
         try
         {
             connected = await _mqttPublisher.IsConnectedAsync();
-        }
+         }
         catch (Exception ex)
         {
             _logger.LogCritical("{0} Error: {1}", ThreadIdString, ex.Message);
         }
         _logger.LogDebug("{0} Connected to Nats Server: {1}", ThreadIdString, connected);
+        IsConnected.Value = connected;
         return connected;
     }
 }

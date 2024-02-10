@@ -19,6 +19,8 @@ public class ValueWithStatistic<T>
 
     public int LastDurationCount { get; set; }
 
+    public TimeSpan CountTimeSpan => DateTime.Now - _dateCountStart;
+
     public DateTime LastChangeTime { get; set; }
 
     public TimeSpan Duration { get; set; } = TimeSpan.FromMinutes(15);
@@ -48,6 +50,7 @@ public class ValueWithStatistic<T>
         else
             _durationCount++;
     }
+
     public override string ToString()
     {
         return $"Value: {_value} LastValue: {LastValue} Changed: {LastChangeTime} ChangeCount: {DurationCount} / {Duration.TotalSeconds} s";

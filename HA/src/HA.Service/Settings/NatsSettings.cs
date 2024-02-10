@@ -17,10 +17,10 @@ public class NatsSettings : AppSettingsBase
 
     [EnvParameter("NATS_URL")]
     [ConfigParameter("nats", "url", Required = true)]
-    public string Url { get; set; } = "http://x.x.x.x:4222/";
+    public string Url { get; set; } = "nats://x.x.x.x:4222/";
 
     [EnvParameter("NATS_CLIENTNAME")]
-    [ConfigParameter("nats", "clientName", Required = true)]
+    [ConfigParameter("nats", "clientName", Required = false)]
     public string ClientName { get; set; }
 
     [EnvParameter("NATS_USER")]

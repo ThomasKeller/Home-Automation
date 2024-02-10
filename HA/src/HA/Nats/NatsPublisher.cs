@@ -13,6 +13,7 @@ public class NatsPublisher
     private readonly ILogger _logger;
     private readonly NatsOpts _natsOpts;
     private NatsConnection? _connection;
+    private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]";
 
     public NatsPublisher(ILogger logger, NatsOpts natsOpts)
     {
@@ -49,7 +50,8 @@ public class NatsPublisher
         }
         if (payload != null && payload.Length > 0)
         {
-            _logger.LogDebug("NATS Publish: Subject: {0} Payload Length: {1}", subject, payload.Length);
+            _logger.LogDebug("{0} NATS Publish: Subject: {1} Payload Length: {2}",
+                ThreadIdString, subject, payload.Length);
             if (_connection != null)
             {
                 await _connection.PublishAsync(subject, payload);
@@ -65,7 +67,8 @@ public class NatsPublisher
         }
         if (measurement != null)
         {
-            _logger.LogDebug("NATS Publish: Subject: {0} Measurement: {1}", subject, measurement.ToLineProtocol(TimeResolution.s));
+            _logger.LogDebug("{0} NATS Publish: Subject: {1} Measurement: {2}", 
+                ThreadIdString, subject, measurement.ToLineProtocol(TimeResolution.s));
             if (_connection != null)
             {
                 var headerParams = lineProtocol ? _headerLP : _headerJson;
@@ -83,12 +86,14 @@ public class NatsPublisher
         _connection = new NatsConnection(_natsOpts);
         var timeResponse = await _connection.PingAsync();
         var serverInfo = _connection.ServerInfo;
-        _logger.LogInformation("NATS connection state: {0} Ping/Pong time: {1} ms",
-            _connection.ConnectionState, timeResponse.TotalMilliseconds);
+        _logger.LogInformation("{0} NATS connection state: {1} Ping/Pong time: {2} ms",
+            ThreadIdString, _connection.ConnectionState, timeResponse.TotalMilliseconds);
         if (serverInfo != null)
         {
-            _logger.LogInformation($"Server: Name: {serverInfo.Name} Version: {serverInfo.Version} Jetstream Enable: {serverInfo.JetStreamAvailable}");
-            _logger.LogInformation($"Server: Host: {serverInfo.Host} Port: {serverInfo.Port} Id: {serverInfo.Id}");
+            _logger.LogInformation("{0} Server: Name: {1} Version: {2} Jetstream Enable: {3}",
+                ThreadIdString, serverInfo.Name, serverInfo.Version, serverInfo.JetStreamAvailable);
+            _logger.LogInformation("{0} Server: Host: {1} Port: {2} Id: {3}",
+                ThreadIdString, serverInfo.Host, serverInfo.Port, serverInfo.Id);
         }
         return _connection.ConnectionState;
     }

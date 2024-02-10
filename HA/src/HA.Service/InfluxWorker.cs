@@ -1,24 +1,24 @@
-﻿using HA.Nats;
+﻿using HA.Influx;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
 namespace HA.Service;
 
-public class NatsWorker : BackgroundService, IObserverProcessor
+public class InfluxWorker : BackgroundService, IObserverProcessor
 {
     private readonly ILogger _logger;
-    private readonly NatsPublisher _natsPublisher;
+    private readonly IInfluxStore _influxStore;
     private readonly ConcurrentQueue<Measurement> _measurementQueue = new ();
-    private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]"; 
+    private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]";
 
-    public NatsWorker(ILogger<NatsWorker> logger, NatsPublisher natsPublisher)
+    public InfluxWorker(ILogger<InfluxWorker> logger, IInfluxStore influxStore)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _natsPublisher = natsPublisher ?? throw new ArgumentNullException(nameof(natsPublisher));
+        _influxStore = influxStore ?? throw new ArgumentNullException(nameof(influxStore));
     }
 
-    public ValueWithStatistic<int> CountPublished { get; set; } = new ValueWithStatistic<int>(0);
+    public ValueWithStatistic<int> CountStoredMeasurements { get; set; } = new ValueWithStatistic<int>(0);
     public ValueWithStatistic<int> CountError { get; set; } = new ValueWithStatistic<int>(0);
     public ValueWithStatistic<bool> IsConnected { get; set; } = new ValueWithStatistic<bool>(false);
 
@@ -33,13 +33,13 @@ public class NatsWorker : BackgroundService, IObserverProcessor
         var checkInterval = TimeSpan.FromMinutes(1);
         var lastReportTime = DateTime.Now;
         var reportInterval = TimeSpan.FromMinutes(1);
-        var isConnected = await IsConnectedToNatsServer();
+        var isConnected = CheckHealth();
         
         while (!stoppingToken.IsCancellationRequested)
         {
             if (DateTime.Now > lastCheckTime + checkInterval)
             {
-                isConnected = await IsConnectedToNatsServer();
+                isConnected = CheckHealth();
                 lastCheckTime = DateTime.Now;
             }
             if (DateTime.Now > lastReportTime + reportInterval)
@@ -53,11 +53,9 @@ public class NatsWorker : BackgroundService, IObserverProcessor
                 {
                     try
                     {
-                        var subject = $"measurements.info.{measurement.Device}";
-                         await _natsPublisher.PublishAsync(subject, measurement.ToJson());
-                        CountPublished.Value++;
-                        _logger.LogInformation("{0} Nats Publish to Subject: {1} | ChangeCount: {2} in {3}s",
-                            ThreadIdString, subject, CountPublished.DurationCount, (int)CountPublished.CountTimeSpan.TotalSeconds);
+                        _logger.LogInformation("{0} MQTT Publish to Topic: measurement/{1}/value", ThreadIdString, measurement.Device);
+                        _influxStore.WriteMeasurement(measurement);
+                        CountStoredMeasurements.Value++;
                         _measurementQueue.TryDequeue(out measurement);
                     }
                     catch (Exception ex)
@@ -75,18 +73,18 @@ public class NatsWorker : BackgroundService, IObserverProcessor
         }
     }
 
-    private async Task<bool> IsConnectedToNatsServer()
+    private bool CheckHealth()
     {
         var connected = false;
         try
         {
-            connected = await _natsPublisher.IsConnectedAsync();
+            connected = _influxStore.CheckHealth();
         }
         catch (Exception ex)
         {
             _logger.LogCritical("{0} Error: {1}", ThreadIdString, ex.Message);
         }
-        _logger.LogDebug("{0} Connected to Nats Server: {1}", ThreadIdString, connected);
+        _logger.LogDebug("{0} Connected to Influs: {1}", ThreadIdString, connected);
         IsConnected.Value = connected;
         return connected;
     }

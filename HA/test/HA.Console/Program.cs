@@ -92,7 +92,7 @@ public class Program
                 measurment.Values.Add(MeasuredValue.Create("UpTimeHour", TimeSpan.FromMilliseconds(Environment.TickCount64).TotalHours));
                 measurment.Values.Add(MeasuredValue.Create("Counter", counter++));
                 worker.ProcessMeasurement(measurment);
-                _logger.LogInformation($"TID:{Thread.CurrentThread.ManagedThreadId}");
+                _logger.LogInformation($"[TID:{Thread.CurrentThread.ManagedThreadId}]");
                 Thread.Sleep(1000);
             }*/
             
