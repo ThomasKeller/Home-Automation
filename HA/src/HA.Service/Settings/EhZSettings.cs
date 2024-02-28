@@ -19,7 +19,7 @@ public class EhZSettings : AppSettingsBase
 
     [EnvParameter("SERIALPORT")]
     [ConfigParameter("ehz", "serialPort", Required = false)]
-    public string SerialPort { get; set; }
+    public string? SerialPort { get; set; }
 
     [EnvParameter("UDP_PORT_IN")]
     [ConfigParameter("ehz", "udp_port_in", Required = false)]
@@ -35,5 +35,5 @@ public class EhZSettings : AppSettingsBase
 
     [EnvParameter("LINEPROTOCOL_LOG_PATH")]
     [ConfigParameter("ehz", "lineprotocol_log_path", Required = false)]
-    public string LineprotocolLogPath { get; set; }
+    public string? LineprotocolLogPath { get; set; }
 }

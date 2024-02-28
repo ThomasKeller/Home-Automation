@@ -20,43 +20,21 @@ public class Program
             .SetMinimumLevel(appInitSettings.LoggingLevel)
             .AddSimpleConsole(options => {
                 options.SingleLine = true;
-                options.TimestampFormat = "yy-MM-dd HH:mm:ss.fff ";
+                options.TimestampFormat = "dd.MM HH:mm:ss ";
             }));
         try
         {
+            _logger = loggerFactory.CreateLogger("Program       ");
+            _logger.LogInformation("start InfluxWriter service");
             var appSettings = new AppSettings(
-                loggerFactory.CreateLogger<AppSettings>(),
+                loggerFactory.CreateLogger("AppSettings   "),
                 appInitSettings);
             appInitSettings.CheckSettings();
-
-            /*var natsOpts = new NatsOpts() {
-                Name = appSettings.Nats.Name,
-                Url = appSettings.Nats.Url,
-                AuthOpts = new NatsAuthOpts() { 
-                    Username=appSettings.Nats.User,
-                    Password=appSettings.Nats.Password },
-                LoggerFactory = loggerFactory,
-                Verbose = false,
-            };
-            var streamCreator = new NatsStreamCreator(loggerFactory.CreateLogger<NatsStreamCreator>())
-            {
-                                
-            };
-            var streamExists = await streamCreator.CreateStreamAsync(natsOpts);
-            */
-
-
-
-            var components = new Components(loggerFactory, appSettings);
-            components.EnableConsoleObserver();
-
-            _logger = loggerFactory.CreateLogger<Program>();
-            _logger.LogInformation("start Kostal service");
             var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices(services => services
-                    .AddSingleton(components)
-                    .AddSingleton(loggerFactory.CreateLogger<Worker>())
-                    .AddHostedService<Worker>())
+                    .AddSingleton(lf => loggerFactory)
+                    .AddSingleton(appSettings => appSettings)
+                    .AddHostedService<Worker>(w => new Worker(loggerFactory, appSettings)))
                 .Build();
             host.Run();
         }

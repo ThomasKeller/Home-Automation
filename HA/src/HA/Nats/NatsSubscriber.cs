@@ -2,93 +2,158 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using NATS.Client.Core;
+using NATS.Client.JetStream;
 
 namespace HA.Nats;
 
 public class NatsSubscriber : ObservableBase<Measurement>
 {
-    private static readonly Dictionary<string, StringValues> _headerLP = new Dictionary<string, StringValues>
-                    { { "PayloadType", "LineProtocol" }, { "DataType", typeof(Measurement).FullName } };
-    private static readonly Dictionary<string, StringValues> _headerJson = new Dictionary<string, StringValues>
-                    { { "PayloadType", "JSON" }, { "DataType", typeof(Measurement).FullName } };
-    private readonly ILogger _logger;
-    private readonly NatsOpts _natsOpts;
-    private NatsConnection? _connection;
+    public class Parameters
+    {
+        public Parameters(NatsOpts natsOpts, string filteredSubject)
+        {
+            NatsOptions = natsOpts;
+            FilteredSubject = filteredSubject;
+        }
 
-    public NatsSubscriber(ILogger logger, NatsOpts natsOpts)
+        public NatsOpts NatsOptions { get; private set; }
+        public string? QueueGroup { get; set; }
+        public string? ConsumerName { get; set; }
+        public string? StreamName { get; set; }
+        public string? FilteredSubject { get; private set; }
+    } 
+
+    private readonly ILogger _logger;
+    private readonly Parameters _parameters;
+    private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]";
+
+    public NatsSubscriber(ILogger logger, Parameters parameters)
     {
         _logger = logger;
-        _natsOpts = natsOpts;
+        _parameters = parameters;
     }
 
-    public async Task SubscibeAsync(string subject, string? queueGroup = null)
-    {
-        if (_connection == null) {
-            await InitAsync(); 
-        }
+    public ValueWithStatistic<int> MeasurementsReceived { get; set; } = new ValueWithStatistic<int>(0);
 
-        _logger.LogDebug("NATS Publish: Subject: {0} Query Group: {1}", subject, queueGroup);
-        if (_connection != null)
-        {
-            await foreach(var msg in _connection.SubscribeAsync<string>(subject, queueGroup)) {
-                if (msg.Data != null)
-                {
-                    try
-                    {
-                        if (msg.Data.StartsWith("{"))
-                        {
-                            var measurement = Measurement.FromJson(msg.Data);
-                            if (measurement != null)
-                                ExecuteOnNext(measurement);
-                        }
-                        else
-                        {
-                            var measurement = Measurement.FromLineProtocol(msg.Data);
-                            if (measurement != null)
-                                ExecuteOnNext(measurement);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        ExecuteOnError(ex);
-                    }
-                }
-            } 
-        }
-    }
+    public ValueWithStatistic<int> ErrorCount { get; set; } = new ValueWithStatistic<int>(0);
 
-    public async Task PublishAsync(string subject, Measurement measurement, bool lineProtocol = false)
+    public async Task SubscibeAsync(string subject, string? queueGroup = null, CancellationToken stoppingToken = default)
     {
-        if (_connection == null)
+        var natsUtils = new NatsUtils(_logger);
+        var connection = await natsUtils.CreateConnectionAsync(_parameters.NatsOptions, 5, 5);
+        if (_parameters.ConsumerName != null && 
+            _parameters.StreamName != null && 
+            _parameters.FilteredSubject != null)
         {
-            await InitAsync();
-        }
-        if (measurement != null)
-        {
-            _logger.LogDebug("NATS Publish: Subject: {0} Measurement: {1}", 
-                subject, measurement.ToLineProtocol(TimeResolution.s));
-            if (_connection != null)
+            var consumer = await natsUtils.CreateOrUpdateConsumerAsync(
+                    connection,
+                    consumerName: _parameters.ConsumerName,
+                    streamName: _parameters.StreamName,
+                    filteredSubject: _parameters.FilteredSubject);
+            _logger.LogInformation("{0} Stream Cluster: {1} Consumer info: {2}",
+                    ThreadIdString, consumer.Info.Cluster?.ToString(), consumer.Info.Config.ToString());
+            _logger.LogInformation("{0} Stream Name: {1} Subject: {2}, Queue Group: {3}",
+                    ThreadIdString, consumer.Info.StreamName, subject, queueGroup);
+            _logger.LogInformation("{0} No. Messages: Redelivered: {1} Pending: {2} Waiting: {3} AckPending: {4}",
+                    ThreadIdString, consumer.Info.NumRedelivered, consumer.Info.NumPending, consumer.Info.NumWaiting, consumer.Info.NumAckPending);
+
+            var reportInterval = TimeSpan.FromSeconds(60);
+            var lastReport = DateTime.Now;
+            while (!stoppingToken.IsCancellationRequested)
             {
-                if (lineProtocol)
-                    await _connection.PublishAsync(subject, measurement.ToLineProtocol(TimeResolution.ms), 
-                        new NatsHeaders(_headerLP));
-                else
-                    await _connection.PublishAsync(subject, measurement.ToJson(), new NatsHeaders(_headerJson));
+                await ConsumeMessageAsync(consumer, stoppingToken);
+                if (DateTime.Now > lastReport + reportInterval)
+                {
+                    lastReport = DateTime.Now;
+                    _logger.LogInformation("{0} No. Messages: Redelivered: {1} Pending: {2} Waiting: {3} AckPending: {4}",
+                        ThreadIdString, consumer.Info.NumRedelivered, consumer.Info.NumPending,
+                        consumer.Info.NumWaiting, consumer.Info.NumAckPending);
+                    _logger.LogInformation("{0} Measurements received: {1}",
+                        ThreadIdString, MeasurementsReceived.ToShortString());
+                }
+            }
+        }
+        else
+        {
+            _logger.LogInformation("{0} Cluster: {1} Stream Available: {2} | Subcribe without stream support.",
+                ThreadIdString, connection.ServerInfo?.Cluster, connection.ServerInfo?.JetStreamAvailable);
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                //lastLog = DateTime.Now;
+                await foreach (var msg in connection.SubscribeAsync<string>(subject, queueGroup))
+                    ProccessMessage(msg);
             }
         }
     }
 
-    private async Task InitAsync()
+    private async Task ConsumeMessageAsync(INatsJSConsumer consumer, CancellationToken stoppingToken)
     {
-        _connection = new NatsConnection(_natsOpts);
-        var timeResponse = await _connection.PingAsync();
-        var serverInfo = _connection.ServerInfo;
-        _logger.LogInformation("NATS connection state: {0} Ping/Pong time: {1} ms",
-            _connection.ConnectionState, timeResponse.TotalMilliseconds);
-        if (serverInfo != null)
+        try
         {
-            _logger.LogInformation($"Server: Name: {serverInfo.Name} Version: {serverInfo.Version} Jetstream Enable: {serverInfo.JetStreamAvailable}");
-            _logger.LogInformation($"Server: Host: {serverInfo.Host} Port: {serverInfo.Port} Id: {serverInfo.Id}");
+            var next = await consumer.NextAsync<string>(cancellationToken: stoppingToken);
+            var value = next.GetValueOrDefault();
+            if (!string.IsNullOrEmpty(value.Data))
+            {
+                try
+                {
+                    _logger.LogDebug("received header:  {0}", value.Headers);
+                    _logger.LogDebug("received payload: {0}", value.Data);
+                    var payloadIsJson = true; // default
+                    if (value.Headers?.ContainsKey("PayloadType") ?? false)
+                    {
+                        payloadIsJson = value.Headers["PayloadType"].FirstOrDefault() != "JSON";
+                    }  
+                    var measurement = payloadIsJson
+                        ? Measurement.FromJson(value.Data)
+                        : Measurement.FromLineProtocol(value.Data);
+                    if (measurement != null)
+                    {
+                        _logger.LogInformation(measurement.ToString());
+                        MeasurementsReceived.Value++;
+                        ExecuteOnNext(measurement);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                    ErrorCount.Value++;
+                    ExecuteOnError(ex);
+                }
+            }
+            await value.AckAsync();
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            ErrorCount.Value++;
+            ExecuteOnError(ex);
+        }
+    }
+
+    private void ProccessMessage(NatsMsg<string> msg)
+    {
+        if (msg.Data != null)
+        {
+            try
+            {
+                var measurement = msg.Data.StartsWith("{") 
+                    ? Measurement.FromJson(msg.Data)
+                    : Measurement.FromLineProtocol(msg.Data);
+                if (measurement != null)
+                {
+                    _logger.LogInformation("{0} {1}", ThreadIdString, measurement.ToString());
+                    MeasurementsReceived.Value++;
+                    ExecuteOnNext(measurement);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                ErrorCount.Value++;
+                ExecuteOnError(ex);
+            }
+        }
+        else
+            _logger.LogWarning("{0} Empty message received.", ThreadIdString);
     }
 }

@@ -1,6 +1,5 @@
 using FluentAssertions;
 using HA.EhZ.Observer;
-using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -12,16 +11,9 @@ namespace HA.EhZ.Tests;
 
 public class SmlParserTests
 {
-    private ILoggerFactory _loggerFactory;
-
     [SetUp]
     public void Setup()
     {
-        _loggerFactory = LoggerFactory.Create(builder =>
-            builder.AddFilter("Microsoft", LogLevel.Warning)
-                .AddFilter("System", LogLevel.Warning)
-                .AddFilter("ha", LogLevel.Debug)
-                .AddConsole());
     }
 
     [Test]
@@ -53,7 +45,7 @@ public class SmlParserTests
     [Test]
     public void EhZClientTest()
     {
-        var server = new UdpServerObserver(_loggerFactory.CreateLogger<UdpServerObserver>(), 
+        var server = new UdpServerObserver(TestLogger.Create<UdpServerObserver>(), 
             IPAddress.Broadcast.ToString(), 5555);
 
         var observable = new ObservableTest<byte[]>();

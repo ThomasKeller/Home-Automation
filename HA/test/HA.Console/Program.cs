@@ -54,12 +54,12 @@ public class Program
                 AuthOpts = new NatsAuthOpts { Username = "nats", Password = "transfer" }
             };
             var natsPublisher = new NatsPublisher(loggerFactory.CreateLogger<NatsPublisher>(), natsOpts);
-            var natsWorker = new NatsWorker(loggerFactory.CreateLogger<NatsWorker>(), natsPublisher);
+            var natsWorker = new NatsPublisherWorker(loggerFactory.CreateLogger<NatsPublisherWorker>(), natsPublisher);
             var natsTask = natsWorker.StartAsync(CancellationToken.None);
 
             var mqttPublisher = new MqttPublisher(loggerFactory.CreateLogger<MqttPublisher>(),
                 "192.168.111.50", 1883, "Client1");
-            var mqttWorker = new MqttWorker(loggerFactory.CreateLogger<MqttWorker>(), mqttPublisher);
+            var mqttWorker = new MqttPublisherWorker(loggerFactory.CreateLogger<MqttPublisherWorker>(), mqttPublisher);
             mqttWorker.PublishJson = true;
             mqttWorker.PublishLineProtocol = true;
             var mqttTask = mqttWorker.StartAsync(CancellationToken.None);

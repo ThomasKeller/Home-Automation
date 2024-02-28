@@ -75,7 +75,7 @@ public class NatsPublisher
                 var header = new NatsHeaders(headerParams);
                 await _connection.PublishAsync(
                     subject, 
-                    lineProtocol ? measurement.ToLineProtocol(TimeResolution.ms) : measurement.ToJson(), 
+                    data: lineProtocol ? measurement.ToLineProtocol(TimeResolution.ms) : measurement.ToJson(), 
                     header);
             }
         }

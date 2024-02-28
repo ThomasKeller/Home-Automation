@@ -29,16 +29,30 @@ public class NatsStreamCreator
         try
         {
             Connection = new NatsConnection(natsOpts);
+            await Connection.ConnectAsync();
             var timeResponse = await Connection.PingAsync();
             var serverInfo = Connection.ServerInfo;
-            _logger.LogInformation("NATS connection state: {0} Ping/Pong time: {1} ms", 
+            _logger.LogInformation("NATS connection state: {0} Ping/Pong time: {1} ms",
                 Connection.ConnectionState, timeResponse.TotalMilliseconds);
             if (serverInfo != null)
             {
                 _logger.LogInformation($"Server: Name: {serverInfo.Name} Version: {serverInfo.Version} Jetstream Enable: {serverInfo.JetStreamAvailable}");
                 _logger.LogInformation($"Server: Host: {serverInfo.Host} Port: {serverInfo.Port} Id: {serverInfo.Id}");
             }
-            Context = new NatsJSContext(Connection);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex.Message);
+            return false;
+        }
+        return await CreateStreamAsync(Connection, maxAgeInDays);
+    }
+
+    public async Task<bool> CreateStreamAsync(NatsConnection connection, uint maxAgeInDays = 14)
+    {
+        try
+        {
+            Context = new NatsJSContext(connection);
             var streamExists = await Context.CheckStreamExistAsync(StreamName); 
             _logger.LogInformation($"Stream '{StreamName}' exists: {streamExists}");
             Stream = streamExists

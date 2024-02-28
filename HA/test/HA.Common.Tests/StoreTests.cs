@@ -1,22 +1,13 @@
 using HA.Store;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace HA.Tests
 {
     public class StoreTests
     {
-        private ILoggerFactory _loggerFactory;
-
         [SetUp]
         public void Setup()
         {
-            _loggerFactory = LoggerFactory.Create(builder =>
-                builder.AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("ha", LogLevel.Debug)
-                    .AddDebug()
-                    .AddConsole());
             using (var db = new DatabaseContext())
             {
                 db.Database.EnsureCreated();
@@ -26,7 +17,6 @@ namespace HA.Tests
         [TearDown]
         public void Teardown()
         {
-            _loggerFactory.Dispose();
         }
 
         [Test]

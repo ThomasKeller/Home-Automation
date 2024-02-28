@@ -6,32 +6,21 @@ namespace HA.Tests
 {
     public class MqttTests
     {
-        private ILoggerFactory _loggerFactory;
-        private IMqttPublisher _mqttPublisher;
-
         [SetUp]
         public void Setup()
         {
-            _loggerFactory = LoggerFactory.Create(builder =>
-                builder.AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("ha", LogLevel.Debug)
-                    .AddDebug()
-                    .AddConsole());
-            _mqttPublisher = new MqttPublisher(_loggerFactory.CreateLogger<MqttPublisher>(), "localhost");
         }
 
         [TearDown]
         public void Teardown()
         {
-            _loggerFactory.Dispose();
         }
 
         [Test]
         [Category("Integration")]
         public void check_that_we_create_a_unique_name()
         {
-            var sut = new MqttPublisher(_loggerFactory.CreateLogger<MqttPublisher>(), "localhost");
+            var sut = new MqttPublisher(TestLogger.Create<MqttPublisher>(), "localhost");
             if (sut != null)
             {
                 for (var x = 0; x < 10; x++)

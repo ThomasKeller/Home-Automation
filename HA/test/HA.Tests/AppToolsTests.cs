@@ -6,21 +6,14 @@ namespace HA.Tests;
 
 public class AppToolsTests
 {
-    private ILoggerFactory _loggerFactory;
-
     [SetUp]
     public void Setup()
     {
-        _loggerFactory = LoggerFactory.Create(builder =>
-            builder.AddFilter("Microsoft", LogLevel.Warning)
-                .AddFilter("System", LogLevel.Warning)
-                .AddFilter("ha", LogLevel.Debug));
     }
 
     [TearDown]
     public void TearDown()
     {
-        _loggerFactory?.Dispose();
     }
 
     [Test]
@@ -95,7 +88,7 @@ public class AppToolsTests
         Environment.SetEnvironmentVariable("ENV_BOOL", "true", EnvironmentVariableTarget.Process);
         Environment.SetEnvironmentVariable("ENV_DOUBLE", "1.234", EnvironmentVariableTarget.Process);
 
-        var appSettings = new AppSettings(_loggerFactory.CreateLogger<AppSettings>());
+        var appSettings = new AppSettings(TestLogger.Create<AppSettings>());
         Assert.That(appSettings.EnvString, Is.EqualTo("ABC"));
         Assert.That(appSettings.EnvInt32, Is.EqualTo(1234));
         Assert.That(appSettings.EnvBool, Is.EqualTo(true));
@@ -105,7 +98,7 @@ public class AppToolsTests
     [Test]
     public void check_environment_variables_are_partially_assigned_to_properties_with_EnvParameterAttribute()
     {
-        var appSettings = new AppSettings(_loggerFactory.CreateLogger<AppSettings>());
+        var appSettings = new AppSettings(TestLogger.Create<AppSettings>());
 
         var configParameters = appSettings.GetConfigParamenters().ToList();
 

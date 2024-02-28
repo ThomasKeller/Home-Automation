@@ -1,12 +1,11 @@
 ﻿using HA.Mqtt;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using System.Collections.Concurrent;
 
 namespace HA.Service;
 
-public class MqttWorker : BackgroundService, IObserverProcessor
+public class MqttPublisherWorker : BackgroundService, IObserverProcessor
 {
     private readonly ILogger _logger;
     private readonly MqttPublisher _mqttPublisher;
@@ -45,7 +44,7 @@ public class MqttWorker : BackgroundService, IObserverProcessor
     public ValueWithStatistic<int> CountError { get; set; } = new ValueWithStatistic<int>(0);
     public ValueWithStatistic<bool> IsConnected { get; set; } = new ValueWithStatistic<bool>(false);
 
-    public MqttWorker(ILogger<MqttWorker> logger, MqttPublisher mqttPublisher)
+    public MqttPublisherWorker(ILogger<MqttPublisherWorker> logger, MqttPublisher mqttPublisher)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _mqttPublisher = mqttPublisher ?? throw new ArgumentNullException(nameof(mqttPublisher));

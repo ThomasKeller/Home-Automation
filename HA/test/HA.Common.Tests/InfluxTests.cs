@@ -9,23 +9,15 @@ namespace HA.Common.Tests
     {
         private static string _token = "22tNRGhED2ygMzXbWK9NpTErI1YMhJ2xKu5iRo3QXWG2oDrBl5S629ACV813zsvzymhQmKrFISU57N39oWdXuA==";
         private IInfluxStore _client = new InfluxSimpleStore("http://192.168.111.17:8086", "Test", "Keller", _token) { Timeout = 2000 };
-        private ILoggerFactory _loggerFactory;
 
         [SetUp]
         public void Setup()
         {
-            _loggerFactory = LoggerFactory.Create(builder =>
-                builder.AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("ha", LogLevel.Debug)
-                    .AddDebug()
-                    .AddConsole());
         }
 
         [TearDown]
         public void Teardown()
         {
-            _loggerFactory.Dispose();
         }
 
         [Test]
@@ -122,7 +114,7 @@ namespace HA.Common.Tests
 
             var measurements = new List<Measurement>();
             var store = new MeasurementStore();
-            var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(), _client, store);
+            var client = new InfluxResilientStore(TestLogger.Create<InfluxResilientStore>(), _client, store);
             client.WriteMeasurements(new[] { measurement1, measurement2 });
             Thread.Sleep(500);
             client.WriteMeasurements(new[] { measurement1, measurement2 });
@@ -153,7 +145,7 @@ namespace HA.Common.Tests
                 .Callback(() => writeMeasurement2++);
 
             var measurements = new List<Measurement>();
-            var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
+            var client = new InfluxResilientStore(TestLogger.Create<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
             client.WriteMeasurements(new[] { measurement1, measurement2 });
             Thread.Sleep(1000);
@@ -187,7 +179,7 @@ namespace HA.Common.Tests
                 .Callback(() => writeMeasurement2++)
                 .Throws(new BadRequestException(new RestSharp.RestResponse()));
 
-            var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
+            var client = new InfluxResilientStore(TestLogger.Create<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
             client.WriteMeasurements(measurements);
             Thread.Sleep(2000);
@@ -217,7 +209,7 @@ namespace HA.Common.Tests
             influxSimpleStoreMock.Setup(x => x.WriteMeasurements(measurements))
                 .Throws(new UnauthorizedException(new RestSharp.RestResponse()));
 
-            var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
+            var client = new InfluxResilientStore(TestLogger.Create<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
             client.WriteMeasurements(measurements);
             Thread.Sleep(2000);
@@ -249,7 +241,7 @@ namespace HA.Common.Tests
 
             influxSimpleStoreMock.Setup(x => x.WriteMeasurements(measurements))
                 .Throws(new BadRequestException(new RestSharp.RestResponse()));
-            var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
+            var client = new InfluxResilientStore(TestLogger.Create<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
             client.WriteMeasurements(measurements);
             Thread.Sleep(2000);
@@ -281,7 +273,7 @@ namespace HA.Common.Tests
 
             influxSimpleStoreMock.Setup(x => x.WriteMeasurements(measurements))
                 .Throws(new RestApiException(new RestSharp.RestResponse()));
-            var client = new InfluxResilientStore(_loggerFactory.CreateLogger<InfluxResilientStore>(),
+            var client = new InfluxResilientStore(TestLogger.Create<InfluxResilientStore>(),
                 influxSimpleStoreMock.Object, storeMock.Object);
             client.WriteMeasurements(measurements);
             Thread.Sleep(2000);

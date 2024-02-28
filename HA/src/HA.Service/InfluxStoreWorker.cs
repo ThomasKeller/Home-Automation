@@ -5,14 +5,14 @@ using System.Collections.Concurrent;
 
 namespace HA.Service;
 
-public class InfluxWorker : BackgroundService, IObserverProcessor
+public class InfluxStoreWorker : BackgroundService, IObserverProcessor
 {
     private readonly ILogger _logger;
     private readonly IInfluxStore _influxStore;
     private readonly ConcurrentQueue<Measurement> _measurementQueue = new ();
     private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]";
 
-    public InfluxWorker(ILogger<InfluxWorker> logger, IInfluxStore influxStore)
+    public InfluxStoreWorker(ILogger<InfluxStoreWorker> logger, IInfluxStore influxStore)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _influxStore = influxStore ?? throw new ArgumentNullException(nameof(influxStore));

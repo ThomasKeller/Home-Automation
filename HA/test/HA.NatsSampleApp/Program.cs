@@ -1,32 +1,58 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using HA;
 using HA.Nats;
+using HA.Service.Settings;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-Console.WriteLine("Hello, World!");
 
+var appInitSettings = new AppInitSettings();
 var loggerFactory = LoggerFactory.Create(builder => builder
     .AddFilter("Microsoft", LogLevel.Warning)
     .AddFilter("System", LogLevel.Warning)
-    .AddFilter("HA", LogLevel.Debug)
-    .SetMinimumLevel(LogLevel.Information)
+    .AddFilter("ha", appInitSettings.LoggingLevel)
+    .SetMinimumLevel(appInitSettings.LoggingLevel)
     .AddSimpleConsole(options => {
         options.SingleLine = true;
         options.TimestampFormat = "yy-MM-dd HH:mm:ss.fff ";
     }));
-var logger = loggerFactory.CreateLogger("app");
-logger.LogInformation("start app");
 
-var url = "192.168.111.49:4222";
+var logger = loggerFactory.CreateLogger("Application");
+logger.LogInformation("start app");
+logger.LogInformation("read settings");
+
+var appSettings = new AppSettings(
+    loggerFactory.CreateLogger<AppSettings>(),
+    appInitSettings);
+appSettings.CheckSettings();
+
 var natsOpts = new NatsOpts
 {
-    Url = url,
-    Name = "NATS-Test-Producer",
-    AuthOpts = new NatsAuthOpts { Username = "nats", Password = "transfer" }
+    Url = appSettings.Nats.Url,
+    Name = string.IsNullOrEmpty(appSettings.Nats.ClientName) ? "NATS-Sample-App" : appSettings.Nats.ClientName,
+    AuthOpts = new NatsAuthOpts { 
+        Username = appSettings.Nats.User, 
+        Password = appSettings.Nats.Password }
 };
-var sut = new NatsPublisher(loggerFactory.CreateLogger<NatsPublisher>(), natsOpts);
 
+var streamName = appSettings.NatsStream.StreamName;
+var subject = appSettings.NatsStream.Subject;
+var maxAgeInDays = appSettings.NatsStream.maxAgeInDays;
+var streamEnable = !string.IsNullOrEmpty(streamName) && !string.IsNullOrEmpty(subject) && maxAgeInDays > 0;
+var topicPrefix = appSettings.NatsStream.TopicPrefix;
+if (streamEnable)
+{
+    var natsUtils = new NatsUtils(loggerFactory.CreateLogger("NatsUtils  "));
+    var connection = await natsUtils.CreateConnectionAsync(natsOpts, 5, 5);
+    var streamItems = await natsUtils.CreateStreamAsync(connection, streamName, subject, maxAgeInDays);
+    if (streamItems.Context == null)
+        throw new ArgumentNullException("No nats context available");
+    var isAvailable = await natsUtils.CheckStreamExistAsync(streamItems.Context, streamName);
+    if (!isAvailable)
+        throw new Exception($"Stream '{streamName}' is not available.");
+}
+var publisher = new NatsResilientPublisher(loggerFactory.CreateLogger("Publisher  "), natsOpts, streamEnable);
+var count = 0;
 while (true)
 {
     var measurmentGood = new Measurement(DateTime.Now) {
@@ -37,9 +63,9 @@ while (true)
     measurmentGood.Values.Add(MeasuredValue.Create("healthStatus", "OK"));
     measurmentGood.Values.Add(MeasuredValue.Create("healthStatusAsBool", true));
     measurmentGood.Values.Add(MeasuredValue.Create("healthStatusAsInt", 1));
-    measurmentGood.Values.Add(MeasuredValue.Create("healthStatusAsDouble", 1.0));
+    measurmentGood.Values.Add(MeasuredValue.Create("count", count++));
     logger.LogInformation("publish: {0}", measurmentGood.ToLineProtocol(TimeResolution.s));
-    await sut.PublishAsync($"health.test.{measurmentGood.Device}", measurmentGood.ToLineProtocol());
+    publisher.Publish($"{topicPrefix}.{measurmentGood.Device}", measurmentGood);
     Thread.Sleep(1000);
 
     var measurmentBad = new Measurement(DateTime.Now)
@@ -51,9 +77,9 @@ while (true)
     measurmentBad.Values.Add(MeasuredValue.Create("healthStatus", "DOWN"));
     measurmentBad.Values.Add(MeasuredValue.Create("healthStatusAsBool", false));
     measurmentBad.Values.Add(MeasuredValue.Create("healthStatusAsInt", 0));
-    measurmentBad.Values.Add(MeasuredValue.Create("healthStatusAsDouble", 0.0));
+    measurmentBad.Values.Add(MeasuredValue.Create("count", count++));
     logger.LogInformation("publish: {0}", measurmentBad.ToLineProtocol(TimeResolution.s));
-    await sut.PublishAsync($"health.test.{measurmentBad.Device}", measurmentBad.ToLineProtocol());
-    Thread.Sleep(1000);
-
+    publisher.Publish($"{topicPrefix}.{measurmentBad.Device}", measurmentBad);
+    Thread.Sleep(10000);
 }
+

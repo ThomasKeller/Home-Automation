@@ -202,7 +202,7 @@ public class Measurement
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.Append(";Device:").Append(Device);
+        sb.Append("Device:").Append(Device);
         sb.Append(";TimeStamp:").Append(GetTimeStamp());
         return sb.ToString();
     }

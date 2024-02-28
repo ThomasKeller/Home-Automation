@@ -7,7 +7,7 @@ public class ValueWithStatistic<T>
     private int _durationCount = 0;
     private List<int> _durationCounts = new();
 
-    public ValueWithStatistic(T? startValue)
+    public ValueWithStatistic(T? startValue = default)
     {
         _dateCountStart = DateTime.Now;
         SetValue(startValue);
@@ -54,6 +54,11 @@ public class ValueWithStatistic<T>
     public override string ToString()
     {
         return $"Value: {_value} LastValue: {LastValue} Changed: {LastChangeTime} ChangeCount: {DurationCount} / {Duration.TotalSeconds} s";
+    }
+
+    public string ToShortString()
+    {
+        return $"{_value} | {LastChangeTime} | ChangeCount: {DurationCount} / {Duration.TotalSeconds} s";
     }
 
 }

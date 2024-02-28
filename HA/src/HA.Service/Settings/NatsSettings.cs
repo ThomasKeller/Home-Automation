@@ -17,7 +17,7 @@ public class NatsSettings : AppSettingsBase
 
     [EnvParameter("NATS_URL")]
     [ConfigParameter("nats", "url", Required = true)]
-    public string Url { get; set; } = "nats://x.x.x.x:4222/";
+    public string Url { get; set; } = "nats://192.168.111.49:4222/";
 
     [EnvParameter("NATS_CLIENTNAME")]
     [ConfigParameter("nats", "clientName", Required = false)]

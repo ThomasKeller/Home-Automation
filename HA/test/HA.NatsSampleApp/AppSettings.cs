@@ -1,10 +1,7 @@
 ﻿using HA.Service.Settings;
 using Microsoft.Extensions.Logging;
-using NATS.Client.Core;
 
-namespace HA.Simulator.Service;
-
-public class AppSettings 
+public class AppSettings
 {
     public AppInitSettings Application { get; private set; }
 
@@ -17,20 +14,6 @@ public class AppSettings
         Application = appInitSettings;
         Nats = new NatsSettings(Application.Configuration);
         NatsStream = new NatsStreamSettings(Application.Configuration);
-    }
-
-    public NatsOpts CreateNatsOpts()
-    {
-        return new NatsOpts
-        {
-            Url = Nats.Url,
-            Name = Nats.ClientName,
-            AuthOpts = new NatsAuthOpts
-            {
-                Username = Nats.User,
-                Password = Nats.Password
-            }
-        };
     }
 
     public void CheckSettings()

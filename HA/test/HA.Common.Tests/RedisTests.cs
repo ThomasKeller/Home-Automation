@@ -1,5 +1,4 @@
 using HA.Redis;
-using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework.Internal;
 
@@ -7,25 +6,17 @@ namespace HA.Tests
 {
     public class RedisTests
     {
-        private ILoggerFactory _loggerFactory;
         private IFileStore _fileStore;
 
         [SetUp]
         public void Setup()
         {
-            _loggerFactory = LoggerFactory.Create(builder =>
-                builder.AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("ha", LogLevel.Debug)
-                    .AddDebug()
-                    .AddConsole());
-            _fileStore = new FileStore(_loggerFactory.CreateLogger<FileStore>(), "Error");
+            _fileStore = new FileStore(TestLogger.Create<FileStore>(), "Error");
         }
 
         [TearDown]
         public void Teardown()
         {
-            _loggerFactory.Dispose();
         }
 
         [Test]
@@ -64,7 +55,7 @@ namespace HA.Tests
             var streamName = "MyStream";
 
             var sut = new RedisPushToStreamClient(
-                _loggerFactory.CreateLogger<RedisPushToStreamClient>(),
+                TestLogger.Create<RedisPushToStreamClient>(),
                 _fileStore,
                 "192.168.111.50")
             { StreamName = streamName };
@@ -100,7 +91,7 @@ namespace HA.Tests
             fileStoreMock.Setup(x => x.WriteToFile(It.IsAny<string>(), It.IsAny<bool>()))
                 .Callback(() => iFileStoreCalled++);
             var sut = new RedisPushToStreamClient(
-                _loggerFactory.CreateLogger<RedisPushToStreamClient>(),
+                TestLogger.Create<RedisPushToStreamClient>(),
                 _fileStore,
                 "192.168.111.1")
             { StreamName = "MyStream" };
@@ -118,7 +109,7 @@ namespace HA.Tests
             fileStoreMock.Setup(x => x.WriteToFile(It.IsAny<string>(), It.IsAny<bool>()))
                 .Callback(() => iFileStoreCalled++);
             var sut = new RedisPushToStreamClient(
-                _loggerFactory.CreateLogger<RedisPushToStreamClient>(),
+                TestLogger.Create<RedisPushToStreamClient>(),
                 _fileStore,
                 "192.168.111.1")
             { StreamName = "MyStream" };

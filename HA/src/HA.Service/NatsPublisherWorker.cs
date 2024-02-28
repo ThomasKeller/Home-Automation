@@ -5,17 +5,19 @@ using System.Collections.Concurrent;
 
 namespace HA.Service;
 
-public class NatsWorker : BackgroundService, IObserverProcessor
+public class NatsPublisherWorker : BackgroundService, IObserverProcessor
 {
     private readonly ILogger _logger;
     private readonly NatsPublisher _natsPublisher;
+    private readonly bool _lineProtocol;
     private readonly ConcurrentQueue<Measurement> _measurementQueue = new ();
     private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]"; 
 
-    public NatsWorker(ILogger<NatsWorker> logger, NatsPublisher natsPublisher)
+    public NatsPublisherWorker(ILogger<NatsPublisherWorker> logger, NatsPublisher natsPublisher, bool lineProtocol = false)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _natsPublisher = natsPublisher ?? throw new ArgumentNullException(nameof(natsPublisher));
+        _lineProtocol = lineProtocol;
     }
 
     public ValueWithStatistic<int> CountPublished { get; set; } = new ValueWithStatistic<int>(0);
@@ -54,7 +56,7 @@ public class NatsWorker : BackgroundService, IObserverProcessor
                     try
                     {
                         var subject = $"measurements.info.{measurement.Device}";
-                         await _natsPublisher.PublishAsync(subject, measurement.ToJson());
+                         await _natsPublisher.PublishAsync(subject, measurement, _lineProtocol);
                         CountPublished.Value++;
                         _logger.LogInformation("{0} Nats Publish to Subject: {1} | ChangeCount: {2} in {3}s",
                             ThreadIdString, subject, CountPublished.DurationCount, (int)CountPublished.CountTimeSpan.TotalSeconds);
