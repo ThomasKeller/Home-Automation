@@ -119,8 +119,8 @@ public class NatsSubscriber : ObservableBase<Measurement>
                     ErrorCount.Value++;
                     ExecuteOnError(ex);
                 }
+                await value.AckAsync();
             }
-            await value.AckAsync();
         }
         catch (Exception ex)
         {
