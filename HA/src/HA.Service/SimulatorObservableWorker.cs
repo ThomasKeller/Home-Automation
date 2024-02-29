@@ -43,6 +43,8 @@ public class SimulatorObservableWorker : BackgroundService
             measurement.Values.Add(MeasuredValue.Create("Counter", counter++));
             _logger.LogInformation("{0} {1}", ThreadIdString , measurement.ToString());
             MeasurementObservable.ExecuteOnNext(measurement);
+            if (counter > 25)
+                counter = 0;
             await Task.Delay((int)SleepTimeMs, stoppingToken);
         }
     }

@@ -49,6 +49,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HA.Service", "HA\src\HA.Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HA.Simulator.Service", "HA.Simulator.Service\HA.Simulator.Service.csproj", "{52A1C14F-D8FF-4767-A8C1-469AF2F0E73F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HA.MqttPublisher.Service", "HA\src\HA.MqttPublisher.Service\HA.MqttPublisher.Service.csproj", "{A04AE194-1E18-46EB-98CA-C6B63312B626}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -131,6 +133,10 @@ Global
 		{52A1C14F-D8FF-4767-A8C1-469AF2F0E73F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52A1C14F-D8FF-4767-A8C1-469AF2F0E73F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52A1C14F-D8FF-4767-A8C1-469AF2F0E73F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A04AE194-1E18-46EB-98CA-C6B63312B626}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A04AE194-1E18-46EB-98CA-C6B63312B626}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A04AE194-1E18-46EB-98CA-C6B63312B626}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A04AE194-1E18-46EB-98CA-C6B63312B626}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

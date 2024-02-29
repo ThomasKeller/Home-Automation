@@ -37,7 +37,7 @@ public class NatsSubscriber : ObservableBase<Measurement>
 
     public ValueWithStatistic<int> ErrorCount { get; set; } = new ValueWithStatistic<int>(0);
 
-    public async Task SubscibeAsync(string subject, string? queueGroup = null, CancellationToken stoppingToken = default)
+    public async Task SubscribeAsync(string subject, string? queueGroup = null, CancellationToken stoppingToken = default)
     {
         var natsUtils = new NatsUtils(_logger);
         var connection = await natsUtils.CreateConnectionAsync(_parameters.NatsOptions, 5, 5);

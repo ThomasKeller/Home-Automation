@@ -1,16 +1,13 @@
-using HA.Influx;
-using HA.InfluxWriter.Service;
 using HA.Nats;
-using HA.Store;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace HA.InfluxWriter.Service;
+namespace HA.MqttPublisher.Service;
 
 public class Worker : BackgroundService
 {
-    private const string LogCategoryInfluxStore   = "InfluxStore   ";
+    private const string LogCategoryMqttPublisher = "MqttPublisher ";
     private const string LogCategoryWorker        = "Worker        ";
     private const string LogCategoryObserver      = "Meas.Observer ";
     private const string LogCategoryNatsSubcriber = "NatsSubscriber";
@@ -29,14 +26,14 @@ public class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var lastLog = DateTime.MinValue;
-        _logger.LogInformation("{0} Create Influx Resilient Store", ThreadIdString);
-        var influxResilientStore = CreateInfluxResilientStore();
+        _logger.LogInformation("{0} Create MQTT Publisher", ThreadIdString);
+        var mqttPublisher = CreateMqttPublisher();
         _logger.LogInformation("{0} Create Nats Subscriber", ThreadIdString);
         var natsSubscriber = CreateNatsSubscriber();
         _logger.LogInformation("{0} Create Measurement Observer", ThreadIdString);
         var measurementObserver = new MeasurementObserver(
             _loggerFactory.CreateLogger(LogCategoryObserver),
-            influxResilientStore);
+            mqttPublisher);
         measurementObserver.Subscribe(natsSubscriber);
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -57,7 +54,7 @@ public class Worker : BackgroundService
         {
             Url = _appSettings.Nats.Url,
             Name = string.IsNullOrEmpty(_appSettings.Nats.ClientName) 
-                    ? "HA.InfluxWriter.Service" 
+                    ? "HA.MqttPublisher.Service" 
                     : _appSettings.Nats.ClientName,
             AuthOpts = new NatsAuthOpts {
                 Username = _appSettings.Nats.User,
@@ -72,23 +69,15 @@ public class Worker : BackgroundService
             _loggerFactory.CreateLogger(LogCategoryNatsSubcriber),
             new NatsSubscriber.Parameters(
                 CreateNatsOpts(),
-                filteredSubject: _appSettings.NatsConsumer.FilteredSubject) 
-                {
-                    StreamName = _appSettings.NatsConsumer.StreamName,
-                    ConsumerName = _appSettings.NatsConsumer.ConsumerName,
-                    QueueGroup = _appSettings.NatsConsumer.QueueGroup,
-                });
+                filteredSubject: _appSettings.NatsConsumer.FilteredSubject));
     }
 
-    private InfluxResilientStore CreateInfluxResilientStore()
+    private Mqtt.MqttPublisher CreateMqttPublisher()
     {
-        return new InfluxResilientStore(
-            _loggerFactory.CreateLogger(LogCategoryInfluxStore),
-            new InfluxSimpleStore(
-                _appSettings.Influx.InfluxUrl,
-                _appSettings.Influx.InfluxBucket,
-                _appSettings.Influx.InfluxOrg,
-                _appSettings.Influx.InfluxToken),
-                new MeasurementStore(_appSettings.Application.StoreFilePath));
+        return new Mqtt.MqttPublisher(
+            _loggerFactory.CreateLogger(LogCategoryMqttPublisher),
+            _appSettings.Mqtt.MqttHost,
+            _appSettings.Mqtt.MqttPort,
+            _appSettings.Mqtt.MqttClientId);
     }
 }

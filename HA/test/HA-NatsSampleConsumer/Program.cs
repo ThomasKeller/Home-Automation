@@ -45,6 +45,6 @@ var natsObservable = new NatsSubscriber(
         QueueGroup = appSettings.NatsConsumer.QueueGroup,
     });
 natsObservable.Subscribe(consoleObserver);
-await natsObservable.SubscibeAsync(appSettings.NatsConsumer.FilteredSubject);
+await natsObservable.SubscribeAsync(appSettings.NatsConsumer.FilteredSubject);
 
 

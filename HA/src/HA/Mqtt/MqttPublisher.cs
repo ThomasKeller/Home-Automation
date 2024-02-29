@@ -7,7 +7,7 @@ namespace HA.Mqtt;
 
 public class MqttPublisher : IMqttPublisher, IObserverProcessor
 {
-    private readonly ILogger<MqttPublisher> _logger;
+    private readonly ILogger _logger;
     private readonly IMqttClient _client;
     private readonly MqttFactory _mqttFactory = new();
     private readonly MqttClientOptions _clientOptions;
@@ -19,7 +19,7 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
 
     public bool IsConnected => _client != null ? _client.IsConnected : false;
 
-    public MqttPublisher(ILogger<MqttPublisher> logger, MqttClientOptions clientOptions, string? clientId = null)
+    public MqttPublisher(ILogger logger, MqttClientOptions clientOptions, string? clientId = null)
     {
         ClientId = clientId ?? Guid.NewGuid().ToString();
         _logger = logger;
@@ -31,7 +31,7 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
                     TaskScheduler.Default);
     }
 
-    public MqttPublisher(ILogger<MqttPublisher> logger, string host, int port = 1883, string? clientId = null)
+    public MqttPublisher(ILogger logger, string host, int port = 1883, string? clientId = null)
     {
         ClientId = clientId ?? Guid.NewGuid().ToString();
         _logger = logger;
