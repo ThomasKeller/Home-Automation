@@ -23,9 +23,9 @@ public class NatsStreamSettings : AppSettingsBase
     [ConfigParameter("nats", "subject", Required = false)]
     public string Subject { get; set; }  // measurments.>
 
-    [EnvParameter("NATS_TOPIC_PREFIX")]
-    [ConfigParameter("nats", "topicPrefix", Required = false)]
-    public string TopicPrefix { get; set; }  // measurments.new
+    [EnvParameter("NATS_SUBJECT_PREFIX")]
+    [ConfigParameter("nats", "subjectPrefix", Required = false)]
+    public string SubjectPrefix { get; set; }  // measurments.new
 
     [EnvParameter("NATS_MAX_AGE_DAYS")]
     [ConfigParameter("nats", "maxAgeDays", Required = false)]

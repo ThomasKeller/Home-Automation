@@ -39,7 +39,7 @@ var streamName = appSettings.NatsStream.StreamName;
 var subject = appSettings.NatsStream.Subject;
 var maxAgeInDays = appSettings.NatsStream.maxAgeInDays;
 var streamEnable = !string.IsNullOrEmpty(streamName) && !string.IsNullOrEmpty(subject) && maxAgeInDays > 0;
-var topicPrefix = appSettings.NatsStream.TopicPrefix;
+var topicPrefix = appSettings.NatsStream.SubjectPrefix;
 if (streamEnable)
 {
     var natsUtils = new NatsUtils(loggerFactory.CreateLogger("NatsUtils  "));

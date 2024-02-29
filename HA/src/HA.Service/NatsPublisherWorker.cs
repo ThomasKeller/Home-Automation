@@ -13,16 +13,19 @@ public class NatsPublisherWorker : BackgroundService, IObserverProcessor
     private readonly ConcurrentQueue<Measurement> _measurementQueue = new ();
     private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]"; 
 
-    public NatsPublisherWorker(ILogger<NatsPublisherWorker> logger, NatsPublisher natsPublisher, bool lineProtocol = false)
+    public NatsPublisherWorker(ILogger<NatsPublisherWorker> logger, NatsPublisher natsPublisher, string subjectPrefix ="measurements.new", bool lineProtocol = false)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _natsPublisher = natsPublisher ?? throw new ArgumentNullException(nameof(natsPublisher));
         _lineProtocol = lineProtocol;
+        SubjectPrefix = subjectPrefix;
     }
 
     public ValueWithStatistic<int> CountPublished { get; set; } = new ValueWithStatistic<int>(0);
     public ValueWithStatistic<int> CountError { get; set; } = new ValueWithStatistic<int>(0);
     public ValueWithStatistic<bool> IsConnected { get; set; } = new ValueWithStatistic<bool>(false);
+
+    public string SubjectPrefix { get; set; } 
 
     public void ProcessMeasurement(Measurement measurement)
     {
@@ -55,7 +58,7 @@ public class NatsPublisherWorker : BackgroundService, IObserverProcessor
                 {
                     try
                     {
-                        var subject = $"measurements.info.{measurement.Device}";
+                        var subject = $"{SubjectPrefix}.{measurement.Device}";
                          await _natsPublisher.PublishAsync(subject, measurement, _lineProtocol);
                         CountPublished.Value++;
                         _logger.LogInformation("{0} Nats Publish to Subject: {1} | ChangeCount: {2} in {3}s",

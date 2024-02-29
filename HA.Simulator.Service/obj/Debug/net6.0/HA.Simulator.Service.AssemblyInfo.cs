@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HA.Simulator.Service")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+6d9a04f4b275cf982cb69304ed9dbcbca24a162b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+57e2e1fb1eb2de4336979d5fe61ccc2510be9e14")]
 [assembly: System.Reflection.AssemblyProductAttribute("HA.Simulator.Service")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HA.Simulator.Service")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0")]
