@@ -205,7 +205,8 @@ public class NatsUtils
     /// <exception cref="NatsException">NatsException</exception>
     /// <returns>NatsStreamItems</returns>
     public async Task<NatsStreamItems> CreateStreamAsync(NatsConnection connection, string streamName, 
-                                                         string subject, int maxAgeInDays = 14)
+                                                         string subject, int maxAgeInDays = 14, 
+                                                         StreamConfigRetention streamConfigRetention = StreamConfigRetention.Workqueue)
     {
         try
         {
@@ -218,7 +219,7 @@ public class NatsUtils
                 ? await streamItems.Context.GetStreamAsync(streamName)
                 : await streamItems.Context.CreateStreamAsync(new StreamConfig(streamName, new[] { subject })
                 {
-                    Retention = StreamConfigRetention.Workqueue,
+                    Retention = streamConfigRetention,
                     MaxAge = TimeSpan.FromDays(maxAgeInDays)
                 });
             var streamInfo = streamItems.Stream.Info;

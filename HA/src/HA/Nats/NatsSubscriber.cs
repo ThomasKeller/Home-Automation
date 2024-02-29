@@ -101,7 +101,7 @@ public class NatsSubscriber : ObservableBase<Measurement>
                     var payloadIsJson = true; // default
                     if (value.Headers?.ContainsKey("PayloadType") ?? false)
                     {
-                        payloadIsJson = value.Headers["PayloadType"].FirstOrDefault() != "JSON";
+                        payloadIsJson = value.Headers["PayloadType"].FirstOrDefault() == "JSON";
                     }  
                     var measurement = payloadIsJson
                         ? Measurement.FromJson(value.Data)

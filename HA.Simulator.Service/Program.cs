@@ -63,7 +63,7 @@ public class Program
         var subject = appSettings.NatsStream.Subject;
         var maxAgeInDays = appSettings.NatsStream.maxAgeInDays;
         var streamEnable = !string.IsNullOrEmpty(streamName) && !string.IsNullOrEmpty(subject) && maxAgeInDays > 0;
-        var topicPrefix = appSettings.NatsStream.SubjectPrefix;
+        var subjectPrefix = appSettings.NatsStream.SubjectPrefix;
         var natsUtils = new NatsUtils(loggerFactory.CreateLogger("NatsUtils  "));
         var connection = await natsUtils.CreateConnectionAsync(appSettings.CreateNatsOpts(), 5, 5);
         if (streamEnable)
@@ -72,8 +72,10 @@ public class Program
             if (streamItems.Context == null)
                 throw new ArgumentNullException("No nats context available");
             var isAvailable = await natsUtils.CheckStreamExistAsync(streamItems.Context, streamName);
+            await connection.DisposeAsync();
             return isAvailable;
         }
+        await connection.DisposeAsync();
         return false;
     }
 

@@ -39,8 +39,11 @@ public class NatsPublisher
 
     public async Task<bool> IsConnectedAsync()
     {
-        var connectionsState = await InitAsync();
-        return connectionsState == NatsConnectionState.Open; 
+        if (_connection == null)
+        {
+            await InitAsync();
+        }
+        return _connection != null &&  _connection.ConnectionState == NatsConnectionState.Open;
     }
 
     public async Task PublishAsync(string subject, string? payload)
