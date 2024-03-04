@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Globalization;
 using System.Text;
-//using System.Text.Json;
 
 namespace HA;
 
@@ -21,13 +20,13 @@ public class Measurement
 
     public string? ExternalId { get; set; }
 
+    public MeasurementOptions Options { get; set; } = MeasurementOptions.StoreAndPublish;
+
     public string? Device { get; set; }
 
     public QualityInfos Quality { get; set; } = QualityInfos.Good;
 
     public Dictionary<string, string> Tags { get; set; } = new Dictionary<string, string>();
-
-    //public Dictionary<string, object> Values { get; set; } = new Dictionary<string, object>();
 
     /// <summary>
     /// UTC Ticks

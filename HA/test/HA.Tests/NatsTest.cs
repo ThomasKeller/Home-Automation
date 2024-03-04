@@ -101,7 +101,7 @@ public class NatsTests
             Name = "NATS-Test-Producer",
             AuthOpts = new NatsAuthOpts { Username = "nats", Password = "transfer" }
         };
-        var sut = new NatsPublisher(TestLogger.Create<NatsAuthOpts>(), natsOpts);
+        var sut = new NatsPublisher(TestLogger.Create<NatsAuthOpts>(), natsOpts, true);
         await sut.PublishAsync("health.test.value1", "Hello1");
         await sut.PublishAsync("health.test.value2", "Hello2");
         await sut.PublishAsync("health.test.value3", "Hello3");

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using NATS.Client.Core;
 
 namespace HA.Service.Settings;
 
@@ -35,4 +36,19 @@ public class NatsSettings : AppSettingsBase
     {
         CheckSettings();
     }
+
+    public NatsOpts CreateNatsOpts()
+    {
+        return new NatsOpts
+        {
+            Url = Url,
+            Name = ClientName,
+            AuthOpts = new NatsAuthOpts
+            {
+                Username = User,
+                Password = Password
+            }
+        };
+    }
+
 }

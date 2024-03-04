@@ -1,40 +1,26 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using NATS.Client.Core;
+using NATS.Client.JetStream;
 
 namespace HA.Nats;
 
 public class NatsPublisher
 {
-    private static readonly Dictionary<string, StringValues> _headerLP = new Dictionary<string, StringValues> 
-                    { { "PayloadType", "LineProtocol" }, { "DataType", typeof(Measurement).FullName } };
-    private static readonly Dictionary<string, StringValues> _headerJson = new Dictionary<string, StringValues> 
-                    { { "PayloadType", "JSON" }, { "DataType", typeof(Measurement).FullName } };
+    private static readonly Dictionary<string, StringValues> _headerJson = new() { { "PayloadType", "JSON" }, { "DataType", typeof(Measurement).FullName } };
     private readonly ILogger _logger;
     private readonly NatsOpts _natsOpts;
     private NatsConnection? _connection;
+    private INatsJSContext? _context;
+    private bool _useStreamContext;
+
     private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]";
 
-    public NatsPublisher(ILogger logger, NatsOpts natsOpts)
+    public NatsPublisher(ILogger logger, NatsOpts natsOpts, bool useStreamContext)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _natsOpts = natsOpts ?? throw new ArgumentNullException(nameof(natsOpts));
-    }
-
-    public NatsPublisher(ILogger logger, NatsOptions natsOptions)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        if (natsOptions == null) throw new ArgumentNullException(nameof(natsOptions));
-        _natsOpts = new NatsOpts
-        {
-            Url = natsOptions.Url,
-            Name = natsOptions.ClientName,
-            AuthOpts = new NatsAuthOpts
-            {
-                Username = natsOptions.User,
-                Password = natsOptions.Password
-            }
-        };
+        _useStreamContext = useStreamContext;
     }
 
     public async Task<bool> IsConnectedAsync()
@@ -43,7 +29,7 @@ public class NatsPublisher
         {
             await InitAsync();
         }
-        return _connection != null &&  _connection.ConnectionState == NatsConnectionState.Open;
+        return _connection != null && _connection.ConnectionState == NatsConnectionState.Open;
     }
 
     public async Task PublishAsync(string subject, string? payload)
@@ -57,12 +43,22 @@ public class NatsPublisher
                 ThreadIdString, subject, payload.Length);
             if (_connection != null)
             {
-                await _connection.PublishAsync(subject, payload);
+                if (_context != null && _useStreamContext)
+                {
+                    var response = await _context.PublishAsync(
+                        subject, data: payload);
+                    _logger.LogDebug("{0} Reponse: {1}", ThreadIdString, response);
+                }
+                else
+                {
+                    await _connection.PublishAsync(
+                        subject, data: payload);
+                }
             }
         }
     }
 
-    public async Task PublishAsync(string subject, Measurement measurement, bool lineProtocol = false)
+    public async Task PublishAsync(string subject, Measurement measurement)
     {
         if (_connection == null)
         {
@@ -74,12 +70,22 @@ public class NatsPublisher
                 ThreadIdString, subject, measurement.ToLineProtocol(TimeResolution.s));
             if (_connection != null)
             {
-                var headerParams = lineProtocol ? _headerLP : _headerJson;
-                var header = new NatsHeaders(headerParams);
-                await _connection.PublishAsync(
-                    subject, 
-                    data: lineProtocol ? measurement.ToLineProtocol(TimeResolution.ms) : measurement.ToJson(), 
-                    header);
+                var header = new NatsHeaders(_headerJson);
+                if (_context != null && _useStreamContext)
+                {
+                    var response = await _context.PublishAsync(
+                        subject,
+                        data: measurement.ToJson(),
+                        headers: header);
+                    _logger.LogDebug("{0} Reponse: {1}", ThreadIdString, response);
+                }
+                else
+                {
+                    await _connection.PublishAsync(
+                        subject,
+                        data: measurement.ToJson(),
+                        header);
+                }
             }
         }
     }
@@ -97,6 +103,8 @@ public class NatsPublisher
                 ThreadIdString, serverInfo.Name, serverInfo.Version, serverInfo.JetStreamAvailable);
             _logger.LogInformation("{0} Server: Host: {1} Port: {2} Id: {3}",
                 ThreadIdString, serverInfo.Host, serverInfo.Port, serverInfo.Id);
+            if (serverInfo.JetStreamAvailable)
+                _context = new NatsJSContext(_connection);
         }
         return _connection.ConnectionState;
     }

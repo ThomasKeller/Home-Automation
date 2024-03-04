@@ -53,7 +53,7 @@ public class Program
                 Name = "NATS-Test-Producer",
                 AuthOpts = new NatsAuthOpts { Username = "nats", Password = "transfer" }
             };
-            var natsPublisher = new NatsPublisher(loggerFactory.CreateLogger<NatsPublisher>(), natsOpts);
+            var natsPublisher = new NatsPublisher(loggerFactory.CreateLogger<NatsPublisher>(), natsOpts, true);
             var natsWorker = new NatsPublisherWorker(loggerFactory.CreateLogger<NatsPublisherWorker>(), natsPublisher);
             var natsTask = natsWorker.StartAsync(CancellationToken.None);
 

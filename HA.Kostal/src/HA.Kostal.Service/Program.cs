@@ -1,7 +1,6 @@
-using HA.Influx;
 using HA.Nats;
+using HA.Service;
 using HA.Service.Settings;
-using HA.Store;
 
 namespace HA.Kostal.Service;
 
@@ -32,60 +31,40 @@ public class Program
                 appCommonSettings);
             appSettings.CheckSettings();
 
+            _logger.LogInformation("Create Kostal Subject");
             var kostalObservable = new KostalObservable(
-                loggerFactory.CreateLogger<KostalObservable>(),
+                loggerFactory.CreateLogger("KostalObservable"),
                 new KostalClient(
-                    appSettings.Kostal.KostalUrl,
-                    appSettings.Kostal.KostalUser, 
-                    appSettings.Kostal.KostalPassword));
-            kostalObservable.StopDuringSunset = appSettings.Kostal.KostalStopDuringSunset;
-
-            var influxResilientStore = new InfluxResilientStore(
-                loggerFactory.CreateLogger<InfluxResilientStore>(),
-                new InfluxSimpleStore(
-                    appSettings.Influx.InfluxUrl,
-                    appSettings.Influx.InfluxBucket,
-                    appSettings.Influx.InfluxOrg,
-                    appSettings.Influx.InfluxToken),
-                new MeasurementStore(appSettings.Application.StoreFilePath));
-            var influxMeasurementObserver = new MeasurementObserver(
-                loggerFactory.CreateLogger<MeasurementObserver>(),
-                influxResilientStore);
-
-            var natsPublisher = new NatsPublisher(
-                loggerFactory.CreateLogger<NatsPublisher>(),
-                new NatsOptions(
-                    appSettings.Nats.Url,
-                    appSettings.Nats.ClientName,
-                    appSettings.Nats.User,
-                    appSettings.Nats.Password));
-            var natsPublisherProcessor = new NatsPublisherProcessor(
-                loggerFactory.CreateLogger<MeasurementObserver>(),
-                natsPublisher);
-            var natsMeasurementObserver = new MeasurementObserver(
-                loggerFactory.CreateLogger<MeasurementObserver>(),
-                natsPublisherProcessor);
-
-            influxMeasurementObserver.Subscribe(kostalObservable);
-            natsMeasurementObserver.Subscribe(kostalObservable);
-            
-            var consoleObserver = new ConsoleObserver();
-            kostalObservable?.Subscribe(consoleObserver);
-
-            var components = new Components(loggerFactory, appSettings) { 
-                KostalObservable = kostalObservable,
-                InfluxResilientStore = influxResilientStore,
-                InfluxMeasurementObserver = influxMeasurementObserver,
-                NatsMeasurementObserver = natsMeasurementObserver
+                appSettings.Kostal.KostalUrl,
+                appSettings.Kostal.KostalUser,
+                appSettings.Kostal.KostalPassword)) {
+                StopDuringSunset = appSettings.Kostal.KostalStopDuringSunset,
+                Longtitude = appSettings.Kostal.Longtitude,
+                Latitude = appSettings.Kostal.Latitude,
+                MeasureInterval = TimeSpan.FromSeconds(appSettings.Kostal.MeasureInterval_s),
+                SleepInterval = TimeSpan.FromMinutes(appSettings.Kostal.SleepInterval_min)
             };
+            var natsPublisher = new NatsPublisher(
+                loggerFactory.CreateLogger("NatsPublisher"),
+                appSettings.Nats.CreateNatsOpts(),
+                !string.IsNullOrEmpty(appSettings.NatsStream.StreamName));
 
-            var host = Host.CreateDefaultBuilder(args)
-                .ConfigureServices(services => services
-                    .AddSingleton(components)
-                    .AddSingleton(loggerFactory.CreateLogger<Worker>())
-                    .AddHostedService<Worker>())
-                .Build();
-            host.Run();
+            var natsPublisherWorker = new NatsPublisherWorker(
+                loggerFactory.CreateLogger("NatsPublisherWorker"),
+                natsPublisher,
+                appSettings.NatsStream.SubjectPrefix);
+
+            var measurmentObserver = new MeasurementObserver(
+                loggerFactory.CreateLogger("MeasurementObserver"),
+                natsPublisherWorker);
+
+            var disposable = kostalObservable.Subscribe(measurmentObserver);
+
+            var task1 = natsPublisherWorker.CreateTaskAsync(CancellationToken.None);
+            var task2 = kostalObservable.ReadFromKostalAsync(CancellationToken.None);
+
+            AsyncHelper.RunSync(() => Task.WhenAll(task1, task2));
+            Console.ReadLine();
         }
         catch (Exception ex)
         {

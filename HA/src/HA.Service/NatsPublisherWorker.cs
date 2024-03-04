@@ -9,15 +9,13 @@ public class NatsPublisherWorker : BackgroundService, IObserverProcessor
 {
     private readonly ILogger _logger;
     private readonly NatsPublisher _natsPublisher;
-    private readonly bool _lineProtocol;
     private readonly ConcurrentQueue<Measurement> _measurementQueue = new ();
     private string ThreadIdString => $"[TID:{Thread.CurrentThread.ManagedThreadId}]"; 
 
-    public NatsPublisherWorker(ILogger<NatsPublisherWorker> logger, NatsPublisher natsPublisher, string subjectPrefix ="measurements.new", bool lineProtocol = false)
+    public NatsPublisherWorker(ILogger logger, NatsPublisher natsPublisher, string subjectPrefix ="measurements.new")
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _natsPublisher = natsPublisher ?? throw new ArgumentNullException(nameof(natsPublisher));
-        _lineProtocol = lineProtocol;
         SubjectPrefix = subjectPrefix;
     }
 
@@ -30,6 +28,11 @@ public class NatsPublisherWorker : BackgroundService, IObserverProcessor
     public void ProcessMeasurement(Measurement measurement)
     {
         _measurementQueue.Enqueue(measurement);
+    }
+
+    public async Task CreateTaskAsync(CancellationToken token)
+    {
+        await ExecuteAsync(token);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -59,7 +62,7 @@ public class NatsPublisherWorker : BackgroundService, IObserverProcessor
                     try
                     {
                         var subject = $"{SubjectPrefix}.{measurement.Device}";
-                         await _natsPublisher.PublishAsync(subject, measurement, _lineProtocol);
+                         await _natsPublisher.PublishAsync(subject, measurement);
                         CountPublished.Value++;
                         _logger.LogInformation("{0} Nats Publish to Subject: {1} | ChangeCount: {2} in {3}s",
                             ThreadIdString, subject, CountPublished.DurationCount, (int)CountPublished.CountTimeSpan.TotalSeconds);

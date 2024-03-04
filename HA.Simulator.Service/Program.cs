@@ -36,7 +36,10 @@ public class Program
             _logger.LogInformation("start Simulator Service");
             var streamAvailable = CreateStreamAsync(loggerFactory, appSettings).Result;
 
-            var natsPublisher = new NatsPublisher(loggerFactory.CreateLogger<NatsPublisher>(), appSettings.CreateNatsOpts());
+            var natsPublisher = new NatsPublisher(
+                loggerFactory.CreateLogger<NatsPublisher>(),
+                appSettings.Nats.CreateNatsOpts(),
+                !string.IsNullOrEmpty(appSettings.NatsStream.StreamName));
             var natsWorker = new NatsPublisherWorker(loggerFactory.CreateLogger<NatsPublisherWorker>(), natsPublisher);
             var natsTask = natsWorker.StartAsync(CancellationToken.None);
             var natsObserver = new MeasurementObserver(loggerFactory.CreateLogger<Measurement>(), natsWorker);
@@ -65,7 +68,7 @@ public class Program
         var streamEnable = !string.IsNullOrEmpty(streamName) && !string.IsNullOrEmpty(subject) && maxAgeInDays > 0;
         var subjectPrefix = appSettings.NatsStream.SubjectPrefix;
         var natsUtils = new NatsUtils(loggerFactory.CreateLogger("NatsUtils  "));
-        var connection = await natsUtils.CreateConnectionAsync(appSettings.CreateNatsOpts(), 5, 5);
+        var connection = await natsUtils.CreateConnectionAsync(appSettings.Nats.CreateNatsOpts(), 5, 5);
         if (streamEnable)
         {
             var streamItems = await natsUtils.CreateStreamAsync(connection, streamName, subject, maxAgeInDays);

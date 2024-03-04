@@ -15,24 +15,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
-    <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
 	  <ProjectReference Include="..\..\..\HA\src\HA.Service\HA.Service.csproj" />
 	  <ProjectReference Include="..\HA.Kostal\HA.Kostal.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="ResourceSettings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ResourceSettings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="ResourceSettings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ResourceSettings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="store\readme.txt">

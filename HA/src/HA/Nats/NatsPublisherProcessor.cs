@@ -13,8 +13,6 @@ public class NatsPublisherProcessor : IObserverProcessor
         _natsPublisher = natsPublisher ?? throw new ArgumentNullException(nameof(natsPublisher)); 
     }
 
-    public bool UseLineProtocol { get; set; } = false;
-
     public bool AddDeviceToSubject { get; set; } = true;
 
     public string Subject { get; set; } = "measurements.new";

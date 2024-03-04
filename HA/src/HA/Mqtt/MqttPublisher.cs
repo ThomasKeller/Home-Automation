@@ -88,6 +88,11 @@ public class MqttPublisher : IMqttPublisher, IObserverProcessor
 
     public async Task<bool> PublishAsync(string topicPrefix, Measurement measurement)
     {
+        if (!measurement.Options.HasFlag(MeasurementOptions.PublishToMqtt))
+        {
+            _logger.LogDebug("{0} Measurement option doesn't include 'PublishToMqt'. Ignore Measurement", ThreadIdString);
+            return true;
+        }
         var isConnected = await EnsureConnectedAsync();
         if (isConnected)
         {

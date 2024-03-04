@@ -353,21 +353,19 @@ public class NatsUtils
     /// <param name="connection">nats connection</param>
     /// <param name="subject">subject e.g. measurements.new.deviceX</param>
     /// <param name="measurement">measurement</param>
-    /// <param name="lineProtocol">true: send as lineprotocol | false: send as JSON</param>
     /// <exception cref="NatsException">NatsException</exception>
     /// <returns>void</returns>
-    public async Task PublishAsync(NatsConnection connection, string subject, Measurement measurement, bool lineProtocol = false)
+    public async Task PublishAsync(NatsConnection connection, string subject, Measurement measurement)
     {
         try
         {
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             _logger.LogDebug("{0} NATS Publish: Subject: {1} Measurement: {2}",
                 ThreadIdString, subject, measurement.ToLineProtocol(TimeResolution.s));
-            var headerParams = lineProtocol ? _headerLP : _headerJson;
-            var header = new NatsHeaders(headerParams);
+            var header = new NatsHeaders(_headerJson);
             await connection.PublishAsync(
                 subject,
-                lineProtocol ? measurement.ToLineProtocol(TimeResolution.ms) : measurement.ToJson(),
+                measurement.ToJson(),
                 header,
                 cancellationToken: cts.Token);
         }
@@ -390,21 +388,19 @@ public class NatsUtils
     /// <param name="context"></param>
     /// <param name="subject">subject e.g. measurements.new.deviceX</param>
     /// <param name="measurement">measurement</param>
-    /// <param name="lineProtocol">true: send as lineprotocol | false: send as JSON</param>
     /// <exception cref="NatsException">NatsException</exception>
     /// <returns>void</returns>
-    public async Task PublishAsync(INatsJSContext context, string subject, Measurement measurement, bool lineProtocol = false)
+    public async Task PublishAsync(INatsJSContext context, string subject, Measurement measurement)
     {
         try
         {
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             _logger.LogInformation("{0} NATS Publish: Subject: '{1}' Measurement: {2}",
                 ThreadIdString, subject, measurement.ToLineProtocol(TimeResolution.s));
-            var headerParams = lineProtocol ? _headerLP : _headerJson;
-            var header = new NatsHeaders(headerParams);
+            var header = new NatsHeaders(_headerJson);
             var ackResponse =  await context.PublishAsync(
                 subject: subject,
-                data: lineProtocol ? measurement.ToLineProtocol(TimeResolution.ms) : measurement.ToJson(),
+                data: measurement.ToJson(),
                 headers: header,
                 cancellationToken: cts.Token);
             ackResponse.EnsureSuccess();

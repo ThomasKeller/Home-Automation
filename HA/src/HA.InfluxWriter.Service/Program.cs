@@ -34,7 +34,7 @@ public class Program
                 .ConfigureServices(services => services
                     .AddSingleton(lf => loggerFactory)
                     .AddSingleton(appSettings => appSettings)
-                    .AddHostedService<Worker>(w => new Worker(loggerFactory, appSettings)))
+                    .AddHostedService(w => new Worker(loggerFactory, appSettings)))
                 .Build();
             host.Run();
         }

@@ -14,8 +14,7 @@ public class NatsResilientPublisher
     private readonly ILogger _logger;
     private readonly NatsUtils _natsUtils;
     private readonly NatsOpts _natsOpts;
-    private readonly ConcurrentQueue<(string, Measurement, bool)> _measurements = new();
-    private readonly object _lock = new();
+    private readonly ConcurrentQueue<(string, Measurement)> _measurements = new();
     private readonly bool _useStream;
     private NatsConnection? _natsConnection;
     private Task? _backgroundTask = null;
@@ -43,9 +42,9 @@ public class NatsResilientPublisher
 
     public int ToPublishCount { get; set; }
 
-    public void Publish(string subject, Measurement measurement, bool lineProtocol = false)
+    public void Publish(string subject, Measurement measurement)
     {
-        _measurements.Enqueue((subject, measurement, lineProtocol));
+        _measurements.Enqueue((subject, measurement));
     }
 
     private void StartBackgroundTask()
@@ -110,16 +109,14 @@ public class NatsResilientPublisher
                             await _natsUtils.PublishAsync(
                                 context,
                                 subject: measurementInfos.Item1,
-                                measurement: measurementInfos.Item2,
-                                lineProtocol: measurementInfos.Item3);
+                                measurement: measurementInfos.Item2);
                         }
                         else
                         {
                             await _natsUtils.PublishAsync(
                                 _natsConnection,
                                 subject: measurementInfos.Item1,
-                                measurement: measurementInfos.Item2,
-                                lineProtocol: measurementInfos.Item3);
+                                measurement: measurementInfos.Item2);
                         }
                         _logger.LogInformation("{0} Measurement published: {1}", ThreadIdString, measurementInfos.Item2.ToString());
                         _measurements.TryDequeue(out measurementInfos);

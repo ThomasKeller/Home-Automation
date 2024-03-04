@@ -19,20 +19,6 @@ public class AppSettings
         NatsStream = new NatsStreamSettings(Application.Configuration);
     }
 
-    public NatsOpts CreateNatsOpts()
-    {
-        return new NatsOpts
-        {
-            Url = Nats.Url,
-            Name = Nats.ClientName,
-            AuthOpts = new NatsAuthOpts
-            {
-                Username = Nats.User,
-                Password = Nats.Password
-            }
-        };
-    }
-
     public void CheckSettings()
     {
         Application.CheckSettings();

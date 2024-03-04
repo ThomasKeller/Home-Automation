@@ -1,7 +1,4 @@
-﻿using HA.Influx;
-using HA.Mqtt;
-using HA.Nats;
-using HA.Service.Settings;
+﻿using HA.Service.Settings;
 
 namespace HA.Kostal.Service;
 
@@ -11,27 +8,23 @@ public class AppSettings
 
     public KostalSettings Kostal { get; private set; }
 
-    public InfluxSettings Influx { get; private set; }
-
     public NatsSettings Nats {  get; private set; }
 
-    public MqttSettings Mqtt { get; private set; }
+    public NatsStreamSettings NatsStream { get; private set; }
 
     public AppSettings(ILogger logger, AppInitSettings appInitSettings)
     {
         Application = appInitSettings;
         Kostal = new KostalSettings(Application.Configuration);
-        Influx = new InfluxSettings(Application.Configuration);
         Nats = new NatsSettings(Application.Configuration);
-        Mqtt = new MqttSettings(Application.Configuration);
+        NatsStream = new NatsStreamSettings(Application.Configuration);
     }
 
     public void CheckSettings()
     {
         Application.CheckSettings();
         Kostal.CheckSettings();
-        Influx.CheckSettings();
         Nats.CheckSettings();
-        Mqtt.CheckSettings();
+        NatsStream.CheckSettings();
     }
 }

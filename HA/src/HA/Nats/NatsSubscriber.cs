@@ -98,14 +98,7 @@ public class NatsSubscriber : ObservableBase<Measurement>
                 {
                     _logger.LogDebug("received header:  {0}", value.Headers);
                     _logger.LogDebug("received payload: {0}", value.Data);
-                    var payloadIsJson = true; // default
-                    if (value.Headers?.ContainsKey("PayloadType") ?? false)
-                    {
-                        payloadIsJson = value.Headers["PayloadType"].FirstOrDefault() == "JSON";
-                    }  
-                    var measurement = payloadIsJson
-                        ? Measurement.FromJson(value.Data)
-                        : Measurement.FromLineProtocol(value.Data);
+                    var measurement = Measurement.FromJson(value.Data);
                     if (measurement != null)
                     {
                         _logger.LogInformation(measurement.ToString());

@@ -1,4 +1,3 @@
-
 using HA.Service.Settings;
 
 namespace HA.EhZ.Service;
@@ -29,9 +28,6 @@ public class Program
             appInitSettings.CheckSettings();
 
             var components = new Components(loggerFactory, appSettings);
-            //components.Init(envWorkDir);
-            //components.EnableConsoleObserver();
-
             _logger = loggerFactory.CreateLogger<Program>();
             _logger.LogInformation("start service");
             var host = Host.CreateDefaultBuilder(args)
